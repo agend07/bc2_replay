@@ -1,0 +1,45 @@
+# --- BC2 / Project Rome server binaries and game files (do not publish) ---
+*.exe
+*.dll
+Frost.Game.Main_Win32_Final*
+binkw32.dll
+dinput8.dll
+libeay32.dll
+ssleay32.dll
+tibems.dll
+zlib1.dll
+database.dbmanifest
+ProviderID.dat
+serverid.dat
+Win32Game.cfg
+
+# --- game scripts / instance data / rcon ---
+Scripts/
+Instance-bc2/
+Instance-viet/
+pb/
+tools/
+Gerenciar Server/
+backups/
+dist/
+
+# --- recorded match data (large; share as a zip, not in the repo) ---
+demos/
+sessions/
+share_pt1/
+*.fbgd
+*.fbgk
+*.fbidd
+*.fbidk
+*.fbcdd
+*.fbcdk
+*.fbgdd
+*.fbgdk
+
+# --- runtime / session logs ---
+*.log
+__pycache__/
+codex-session-*.md
+RuntimeLog_*.log
+
+summary_pt2.md
