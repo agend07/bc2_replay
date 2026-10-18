@@ -33,8 +33,8 @@ if exist "%BC2_RECBASE%.*" (
 echo Experimental native recorder activation test.
 echo Recording base: %BC2_RECBASE%
 echo Close any other test server before continuing on port 19567.
-echo Read BC2_RECORDING_PATCH_TEST.txt for the test procedure.
-echo Output capture was observed; replay fidelity and playback remain unverified.
+echo Read the recording README in the project repository for instructions.
+echo This launcher records matches; use the separate local-replay app to watch them.
 start "" /wait "%~dp0Frost.Game.Main_Win32_Final.RecordingTest.exe" -server -dedicated -serverInstancePath "Instance-bc2/" -mapPack2Enabled 1 -port 19567 -timeStampLogNames -Demo.RecordDemoFileName "%BC2_RECBASE%"
 echo Server process has exited. Preserve all matching files and the runtime log.
 if exist "%BC2_RECBASE%.*" (

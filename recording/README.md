@@ -1,9 +1,10 @@
-# BC2 / Project Rome — server-side match recording (Part 1)
+# BC2 / Project Rome — server-side match recording
 
 Goal: record full Battlefield: Bad Company 2 matches on a Project Rome
 dedicated server, so the data can be used later for cheat review / analysis.
-This part covers the **recorder** only. The current state of playback/replay is
-summarized in the project [`README.md`](README.md).
+This guide covers the **recorder** only. For watching a recording, see the
+[first-run replay guide](../local-replay/USER_GUIDE.md); the project overview is in
+[the main README](../README.md).
 
 Status: **working and verified.** Two recorded matches are included.
 
@@ -37,6 +38,25 @@ Status: **working and verified.** Two recorded matches are included.
 - Windows, the extracted BC2 dedicated server folder, Project Rome `dinput8.dll`
   next to the server exe, Python 3.
 
+For a user-provided third-party server download link and its caveats, see
+[Dedicated server files](../README.md#dedicated-server-files). The tools require
+the exact supported server executable listed below; the external archive itself
+has not been independently verified.
+
+### Install the recorder tools
+
+Copy the four `.py` files and three `.cmd` launchers from this directory into
+your dedicated server folder, beside `Frost.Game.Main_Win32_Final.exe`.
+Keep them together: these tools resolve server/demo paths relative to their own
+location, not relative to the directory from which you run a command.
+Do not overwrite existing instance settings or server files.
+
+The commands below are run **from that dedicated server folder** after copying.
+The `.cmd` launchers can also be double-clicked or called from another working
+directory. Python 3 must be available as `python` on PATH.
+`config-examples/` contains examples only; use them as a reference when preparing
+your own instance, not as replacements for a working server's identity/password.
+
 ### 1. Build the patched recorder
 ```
 python BuildBC2RecordingTest.py
@@ -54,7 +74,7 @@ python BuildBC2RecordingTest.py
   tickets. Note: BC2 clamps low ticket values (setting 100 showed as 350).
 
 ### 3. Launch the recording server
-Double-click `StartBC2RecordingPatchedTest.cmd`, or run:
+Double-click `StartBC2RecordingPatchedTest.cmd` in the server folder, or run:
 ```
 Frost.Game.Main_Win32_Final.RecordingTest.exe ^
   -server -dedicated -serverInstancePath "Instance-bc2/" ^
@@ -70,7 +90,7 @@ Players join through the Project Rome server browser (name from
 ### 5. Save the recording
 - Automatic: when the round ends / the level (re)loads.
 - Forced, mid-match: run `ZapiszNagranie.cmd`
-  (calls `diagnostics\bc2_stop_recording.py --confirm`).
+  (calls `bc2_stop_recording.py --confirm`).
 - Do **not** force-kill the server: buffered data is lost.
 
 ### 6. Output files (per recording)
@@ -105,24 +125,24 @@ Each recording is the full 9-file family. Keep all files of a family together.
 They are included in this repository as `recordings_pt1.zip` (unzip into `demos/`
 to use them). Note: they contain player names.
 
-## Files in this repository
+## Files in this directory
 
 | File | Purpose |
 |---|---|
-| `summary_pt1.md` | this document |
-| `README.md` | overview: recording + playback status |
+| `README.md` | this recording guide |
 | `BuildBC2RecordingTest.py` | builds the patched recording server exe |
 | `StartBC2RecordingPatchedTest.cmd` | launches the recording server |
 | `StartBC2RecorderMonitor.cmd` | starts the live monitor (runs `BC2RecorderMonitor.py`) |
 | `BC2RecorderMonitor.py` | read-only live monitor of the recording state |
 | `ZapiszNagranie.cmd` | forces a save of the current recording |
-| `diagnostics/bc2_stop_recording.py` | clears the recording flag (used by `ZapiszNagranie.cmd`) |
+| `bc2_stop_recording.py` | clears the recording flag (used by `ZapiszNagranie.cmd`) |
 | `InspectBC2Demo.py` | verifies/reads a recording |
 | `config-examples/maplist.txt` | example map list |
 | `config-examples/Startup.txt` | example server/`levelVars` startup script |
 | `config-examples/ServerOptions.ini` | example server options |
 | `recordings_pt1.zip` | the two recorded matches above (full 9-file families) |
-| `.gitignore` | keeps server binaries and extracted match data out of the repo |
+The repository's root `.gitignore` excludes server binaries, runtime data and
+extracted match files from publication.
 
 Not included: the server/game binaries (EA/DICE).
 
@@ -134,4 +154,3 @@ Not included: the server/game binaries (EA/DICE).
 - Recording starts with the server, so an empty intro before the first player
   joins is included.
 - Ticket values are clamped/rounded by the engine for Conquest.
-```

@@ -1,36 +1,56 @@
-# BC2 / Project Rome — server-side match recording
+# BC2 Local Replay & Recording
 
-Tools and notes for recording Battlefield: Bad Company 2 dedicated-server
-matches (Project Rome), plus the current state of playing them back.
+Tools for recording Battlefield: Bad Company 2 dedicated-server matches and
+watching them through a local replay server and Project Rome client.
+Recordings contain game state, not video; playback uses the actual game engine.
 
-## Recording
+## Watch a recorded match
 
-BC2 dedicated servers can record a whole match as *ghost data*: every player's
-position + orientation (~30 Hz), plus destruction and spotting. The stock
-server cannot enable this from the command line, so this repo contains a small
-binary patch that turns the recorder on, together with the tools to launch,
-monitor and save a recording.
+1. Download the standalone Windows ZIP from **[GitHub Releases](../../releases)**
+   when a preview release is available, then extract it.
+2. Follow the **[first-run guide](local-replay/USER_GUIDE.md)**: configure paths,
+   run setup, select a Demo, enable the local redirect, start replay and launch BC2.
+3. Use dummy credentials, join **Local Replay** and click **Play**.
 
-**How to modify the server and run it to record a match:**
-see [`summary_pt1.md`](summary_pt1.md).
+The controller provides Play/Pause/Seek, free camera, Focus and experimental
+Follow. Follow can be jittery; it is not native player possession.
+The redirect sends the Rome login/server-list hostname to your local backend;
+turn it off before returning to online Rome. See the guide for details.
 
-This repo also ships two recorded matches (`recordings_pt1.zip`) and example
-configs.
+You need your own supported BC2 client, dedicated server files and Project Rome.
+No Python is needed for the standalone application. For building from source,
+see **[local-replay/README.md](local-replay/README.md)**. GitHub Actions builds a
+ZIP; version tags create a draft prerelease for review before publication.
 
-## Playback — current state
+## Dedicated server files
 
-Playback works: the server can replay a recording, and a client can join and
-watch the match — with a timeline / seek and a free-fly camera.
+A user-provided third-party download is available here:
+**[Host Server BC2-Vietnam 2025 (MediaFire)](https://www.mediafire.com/file/l06p1f5i90n1bjx/Host_Server_BC2-Vietnam_2025.rar/file)**.
+This is not an official project download. We have not independently verified the
+archive's contents, safety or redistribution permissions. Only download files
+you trust and are entitled to use. Setup checks the expected server EXE hash;
+that is a compatibility check, not a security audit of the whole archive.
 
-What is **not** solved yet is making the replay automatically follow one chosen
-player. The viewer is bound to a recorded player by the *server* (likely by
-connection slot / order), not by account or persona name — so joining as a
-specific player does not make the replay follow them.
+## Record a match
 
-**Status: usable manually, not yet automated.** A fuller write-up (Part 2)
-exists but has no step-by-step instructions yet, so it is not included here.
+See **[recording/README.md](recording/README.md)** for server requirements,
+building the recorder patch, launching a recording server, saving a match and
+checking its files. All recorder tools, launchers and example instance settings
+are grouped in [`recording/`](recording/); the separate viewer is in
+[`local-replay/`](local-replay/).
 
-## Not included
+[`recordings_pt1.zip`](recording/recordings_pt1.zip) contains two sample matches. Extract their nine-file families
+into the server's `demos/` folder. **Player names are retained; the recordings are
+not anonymized.**
 
-Game / server binaries (EA / DICE) are not included (copyright). You bring your
-own BC2 dedicated server files and Project Rome.
+## Preview status and safety
+
+- First-run startup and playback from a freshly extracted folder were confirmed
+  on the development PC. Different-PC and disconnected-network validation remain
+  pending; this is not a guarantee for every recording/build or camera case.
+- Use **dummy login credentials only**, never your real online account details.
+- Do not share generated `preview.json`, `runtime/`, private logs or hosts backups.
+- Closing the controller does not stop backend/server processes. Follow the
+  guide's shutdown steps and restore Redirect Off before normal online play.
+- Game/server binaries and Project Rome DLLs are not distributed here. Bring
+  your own files; unsupported executable versions are rejected.

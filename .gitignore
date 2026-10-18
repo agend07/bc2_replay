@@ -43,3 +43,29 @@ codex-session-*.md
 RuntimeLog_*.log
 
 summary_pt2.md
+
+# Private backend research artifacts: never publish captures, dumps or credentials
+*.dmp
+*.bin
+*_capture/
+stub_capture/
+checkpoints/
+private-*/
+*.pcap
+*.pcapng
+.env
+.env.*
+
+# Local replay configuration, generated instances and private controller state
+preview.json
+runtime/
+private_*
+*.private.*
+*.spec
+build/
+*.pyc
+*.json.tmp
+.venv/
+
+# Earlier research notes are not part of the runnable replay release
+/offline-replay/

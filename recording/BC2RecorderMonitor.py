@@ -9,8 +9,8 @@ shows the in-process state and the RAM buffer growth instead, and reports the
 disk flush when it happens.
 
 No writes, no remote thread, no injected code. Only OpenProcess (read) and
-ReadProcessMemory. Addresses are the fixed-base VAs documented in findings2.md
-and reused by BC2ReplayTimeline.py (global context at 0x19C4CC0).
+ReadProcessMemory. Addresses match the exact supported fixed-base server build
+(global context at 0x19C4CC0).
 
 Usage:
     python BC2RecorderMonitor.py            # live, refresh once per second
@@ -24,7 +24,7 @@ import os
 import struct
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime
 
 ROOT = Path(__file__).resolve().parent
 DEMOS = ROOT / 'demos'
@@ -50,7 +50,6 @@ BUF_START = 0x58
 BUF_WRITE = 0x60
 
 TARGET = 'frost.game.main_win32_final.recordingtest.exe'
-FALLBACK = 'frost.game.main_win32_final.exe'
 FPS = 30
 
 k = c.WinDLL('kernel32', use_last_error=True)
@@ -72,7 +71,6 @@ k.CloseHandle.argtypes = [w.HANDLE]
 k.OpenProcess.argtypes = [w.DWORD, w.BOOL, w.DWORD]
 k.OpenProcess.restype = w.HANDLE
 k.ReadProcessMemory.argtypes = [w.HANDLE, c.c_void_p, c.c_void_p, c.c_size_t, c.POINTER(c.c_size_t)]
-k.QueryFullProcessImageNameW.argtypes = [w.HANDLE, w.DWORD, w.LPWSTR, c.POINTER(w.DWORD)]
 
 
 def processes():
@@ -91,14 +89,6 @@ def processes():
     finally:
         k.CloseHandle(snap)
     return found
-
-
-def image_path(handle):
-    buf = c.create_unicode_buffer(32768)
-    length = w.DWORD(len(buf))
-    if not k.QueryFullProcessImageNameW(handle, 0, buf, c.byref(length)):
-        return ''
-    return buf.value
 
 
 class Reader:
@@ -292,7 +282,6 @@ def main():
             print(f'Cannot open PID {pid}: {exc}')
             return 2
         try:
-            path = Path(image_path(reader.handle)).resolve()
             prev = {}
             if args.once:
                 text, _, _ = render(reader, prev)

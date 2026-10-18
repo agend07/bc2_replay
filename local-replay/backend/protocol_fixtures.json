@@ -1,0 +1,1005 @@
+{
+  "schema": 1,
+  "client": {
+    "Hello": [
+      {
+        "magic": "fsys",
+        "fragmented": false,
+        "fields": {
+          "TXN": "Hello",
+          "domainPartition.domain": "eagames",
+          "messengerIp": "127.0.0.1",
+          "messengerPort": "13505",
+          "domainPartition.subDomain": "BFBC2",
+          "activityTimeoutSecs": "300",
+          "curTime": "2020-01-01T00:00:00Z",
+          "theaterIp": "127.0.0.1",
+          "theaterPort": "18395"
+        }
+      }
+    ],
+    "NuLogin": [
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuLogin",
+          "lkey": "LOCAL-ONLY-NOT-A-REAL-LOGIN-KEY",
+          "nuid": "viewer@local.invalid",
+          "profileId": "1000001",
+          "userId": "1000001"
+        }
+      }
+    ],
+    "NuGetPersonas": [
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetPersonas",
+          "personas.[]": "1",
+          "personas.0": "LocalViewer"
+        }
+      }
+    ],
+    "NuLoginPersona": [
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuLoginPersona",
+          "lkey": "LOCAL-ONLY-NOT-A-REAL-LOGIN-KEY",
+          "profileId": "1000001",
+          "userId": "1000001"
+        }
+      }
+    ],
+    "GetPingSites": [
+      {
+        "magic": "fsys",
+        "fragmented": false,
+        "fields": {
+          "TXN": "GetPingSites",
+          "minPingSitesToPing": "0",
+          "pingSite.[]": "0"
+        }
+      }
+    ],
+    "GetAssociations": [
+      {
+        "magic": "asso",
+        "fragmented": false,
+        "fields": {
+          "TXN": "GetAssociations",
+          "type": "PlasmaMute",
+          "domainPartition.domain": "eagames",
+          "domainPartition.subDomain": "BFBC2",
+          "owner.id": "1000001",
+          "owner.name": "LocalViewer",
+          "owner.type": "1",
+          "maxListSize": "100",
+          "members.[]": "0"
+        }
+      },
+      {
+        "magic": "asso",
+        "fragmented": false,
+        "fields": {
+          "TXN": "GetAssociations",
+          "type": "PlasmaBlock",
+          "domainPartition.domain": "eagames",
+          "domainPartition.subDomain": "BFBC2",
+          "owner.id": "1000001",
+          "owner.name": "LocalViewer",
+          "owner.type": "1",
+          "maxListSize": "100",
+          "members.[]": "0"
+        }
+      },
+      {
+        "magic": "asso",
+        "fragmented": false,
+        "fields": {
+          "TXN": "GetAssociations",
+          "type": "PlasmaFriends",
+          "domainPartition.domain": "eagames",
+          "domainPartition.subDomain": "BFBC2",
+          "owner.id": "1000001",
+          "owner.name": "LocalViewer",
+          "owner.type": "1",
+          "maxListSize": "100",
+          "members.[]": "0"
+        }
+      },
+      {
+        "magic": "asso",
+        "fragmented": false,
+        "fields": {
+          "TXN": "GetAssociations",
+          "type": "PlasmaRecentPlayers",
+          "domainPartition.domain": "eagames",
+          "domainPartition.subDomain": "BFBC2",
+          "owner.id": "1000001",
+          "owner.name": "LocalViewer",
+          "owner.type": "1",
+          "maxListSize": "100",
+          "members.[]": "0"
+        }
+      }
+    ],
+    "ModifySettings": [
+      {
+        "magic": "xmsg",
+        "fragmented": false,
+        "fields": {
+          "TXN": "ModifySettings"
+        }
+      }
+    ],
+    "GetTelemetryToken": [
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "GetTelemetryToken",
+          "telemetryToken": "",
+          "enabled": "",
+          "filters": "",
+          "disabled": ""
+        }
+      }
+    ],
+    "SetPresenceStatus": [
+      {
+        "magic": "pres",
+        "fragmented": false,
+        "fields": {
+          "TXN": "SetPresenceStatus"
+        }
+      }
+    ],
+    "NuGetEntitlements": [
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "4",
+          "entitlements.0.entitlementId": "2000000",
+          "entitlements.0.entitlementTag": "ONLINE_ACCESS",
+          "entitlements.0.grantDate": "",
+          "entitlements.0.groupName": "BFBC2PC",
+          "entitlements.0.productId": "DR%3a156691300",
+          "entitlements.0.status": "ACTIVE",
+          "entitlements.0.statusReasonCode": "",
+          "entitlements.0.terminationDate": "",
+          "entitlements.0.version": "0",
+          "entitlements.0.userId": "1000001",
+          "entitlements.1.entitlementId": "2000001",
+          "entitlements.1.entitlementTag": "BFBC2%3aPC%3aVIETNAM_ACCESS",
+          "entitlements.1.grantDate": "",
+          "entitlements.1.groupName": "BFBC2PC",
+          "entitlements.1.productId": "DR%3a219316800",
+          "entitlements.1.status": "ACTIVE",
+          "entitlements.1.statusReasonCode": "",
+          "entitlements.1.terminationDate": "",
+          "entitlements.1.version": "0",
+          "entitlements.1.userId": "1000001",
+          "entitlements.2.entitlementId": "2000002",
+          "entitlements.2.entitlementTag": "BFBC2%3aPC%3aVIETNAM_PDLC",
+          "entitlements.2.grantDate": "",
+          "entitlements.2.groupName": "BFBC2PC",
+          "entitlements.2.productId": "DR%3a219316800",
+          "entitlements.2.status": "ACTIVE",
+          "entitlements.2.statusReasonCode": "",
+          "entitlements.2.terminationDate": "",
+          "entitlements.2.version": "0",
+          "entitlements.2.userId": "1000001",
+          "entitlements.3.entitlementId": "2000003",
+          "entitlements.3.entitlementTag": "BFBC2%3aPC%3aALLKIT",
+          "entitlements.3.grantDate": "",
+          "entitlements.3.groupName": "BFBC2PC",
+          "entitlements.3.productId": "DR%3a192365600",
+          "entitlements.3.status": "ACTIVE",
+          "entitlements.3.statusReasonCode": "",
+          "entitlements.3.terminationDate": "",
+          "entitlements.3.version": "0",
+          "entitlements.3.userId": "1000001"
+        }
+      },
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "1",
+          "entitlements.0.entitlementId": "2000000",
+          "entitlements.0.entitlementTag": "BFBC2%3aPC%3aADDSVETRANK",
+          "entitlements.0.grantDate": "",
+          "entitlements.0.groupName": "AddsVetRank",
+          "entitlements.0.productId": "",
+          "entitlements.0.status": "ACTIVE",
+          "entitlements.0.statusReasonCode": "",
+          "entitlements.0.terminationDate": "",
+          "entitlements.0.version": "0",
+          "entitlements.0.userId": "1000001"
+        }
+      },
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "0"
+        }
+      }
+    ],
+    "GetRecordAsMap": [
+      {
+        "magic": "recp",
+        "fragmented": true,
+        "fields": {
+          "TXN": "GetRecordAsMap",
+          "TTL": "0",
+          "lastModified": "0",
+          "state": "1",
+          "values.{}": "0"
+        }
+      }
+    ],
+    "GetMessages": [
+      {
+        "magic": "xmsg",
+        "fragmented": false,
+        "fields": {
+          "TXN": "GetMessages",
+          "localizedMessage": "",
+          "messages.[]": "0"
+        }
+      }
+    ],
+    "GetLockerURL": [
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "GetLockerURL",
+          "URL": "http://127.0.0.1/"
+        }
+      }
+    ],
+    "GetRecord": [
+      {
+        "magic": "recp",
+        "fragmented": false,
+        "fields": {
+          "TXN": "GetRecord",
+          "localizedMessage": "",
+          "errorContainer.[]": "0",
+          "errorCode": "5000"
+        }
+      }
+    ]
+  },
+  "server": {
+    "Hello": [
+      {
+        "magic": "fsys",
+        "fragmented": false,
+        "fields": {
+          "TXN": "Hello",
+          "domainPartition.domain": "eagames",
+          "messengerIp": "127.0.0.1",
+          "messengerPort": "13505",
+          "domainPartition.subDomain": "BFBC2",
+          "activityTimeoutSecs": "300",
+          "curTime": "2020-01-01T00:00:00Z",
+          "theaterIp": "127.0.0.1",
+          "theaterPort": "19026"
+        }
+      }
+    ],
+    "NuLogin": [
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuLogin",
+          "lkey": "LOCAL-ONLY-NOT-A-REAL-LOGIN-KEY",
+          "nuid": "server@local.invalid",
+          "profileId": "1000002",
+          "userId": "1000002",
+          "encryptedLoginInfo": ""
+        }
+      }
+    ],
+    "NuGetPersonas": [
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetPersonas",
+          "personas.[]": "1",
+          "personas.0": "local.replay.server"
+        }
+      }
+    ],
+    "NuLoginPersona": [
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuLoginPersona",
+          "lkey": "LOCAL-ONLY-NOT-A-REAL-LOGIN-KEY",
+          "profileId": "1000002",
+          "userId": "1000002"
+        }
+      }
+    ],
+    "GetAssociations": [
+      {
+        "magic": "asso",
+        "fragmented": false,
+        "fields": {
+          "TXN": "GetAssociations",
+          "type": "PlasmaMute",
+          "domainPartition.domain": "eagames",
+          "domainPartition.subDomain": "BFBC2",
+          "owner.id": "1000002",
+          "owner.name": "local.replay.server",
+          "owner.type": "1",
+          "maxListSize": "100",
+          "members.[]": "0"
+        }
+      },
+      {
+        "magic": "asso",
+        "fragmented": false,
+        "fields": {
+          "TXN": "GetAssociations",
+          "type": "PlasmaBlock",
+          "domainPartition.domain": "eagames",
+          "domainPartition.subDomain": "BFBC2",
+          "owner.id": "1000002",
+          "owner.name": "local.replay.server",
+          "owner.type": "1",
+          "maxListSize": "100",
+          "members.[]": "0"
+        }
+      },
+      {
+        "magic": "asso",
+        "fragmented": false,
+        "fields": {
+          "TXN": "GetAssociations",
+          "type": "PlasmaFriends",
+          "domainPartition.domain": "eagames",
+          "domainPartition.subDomain": "BFBC2",
+          "owner.id": "1000002",
+          "owner.name": "local.replay.server",
+          "owner.type": "1",
+          "maxListSize": "100",
+          "members.[]": "0"
+        }
+      },
+      {
+        "magic": "asso",
+        "fragmented": false,
+        "fields": {
+          "TXN": "GetAssociations",
+          "type": "PlasmaRecentPlayers",
+          "domainPartition.domain": "eagames",
+          "domainPartition.subDomain": "BFBC2",
+          "owner.id": "1000002",
+          "owner.name": "local.replay.server",
+          "owner.type": "1",
+          "maxListSize": "100",
+          "members.[]": "0"
+        }
+      },
+      {
+        "magic": "asso",
+        "fragmented": false,
+        "fields": {
+          "TXN": "GetAssociations",
+          "type": "dogtags",
+          "domainPartition.domain": "eagames",
+          "domainPartition.subDomain": "BFBC2",
+          "owner.id": "1000002",
+          "owner.name": "local.replay.server",
+          "owner.type": "1",
+          "maxListSize": "100",
+          "members.[]": "0"
+        }
+      }
+    ],
+    "AddAssociations": [
+      {
+        "magic": "asso",
+        "fragmented": false,
+        "fields": {
+          "TXN": "AddAssociations"
+        }
+      }
+    ],
+    "NuLookupUserInfo": [
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuLookupUserInfo",
+          "userInfo.0.namespace": "battlefield",
+          "userInfo.0.userName": "LocalViewer",
+          "userInfo.0.userId": "1000001",
+          "userInfo.0.masterUserId": "1000001",
+          "userInfo.[]": "1"
+        }
+      }
+    ],
+    "NuGetEntitlements": [
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "4",
+          "entitlements.0.entitlementId": "2000000",
+          "entitlements.0.entitlementTag": "ONLINE_ACCESS",
+          "entitlements.0.grantDate": "",
+          "entitlements.0.groupName": "BFBC2PC",
+          "entitlements.0.productId": "DR%3a156691300",
+          "entitlements.0.status": "ACTIVE",
+          "entitlements.0.statusReasonCode": "",
+          "entitlements.0.terminationDate": "",
+          "entitlements.0.version": "0",
+          "entitlements.0.userId": "1000002",
+          "entitlements.1.entitlementId": "2000001",
+          "entitlements.1.entitlementTag": "BFBC2%3aPC%3aVIETNAM_ACCESS",
+          "entitlements.1.grantDate": "",
+          "entitlements.1.groupName": "BFBC2PC",
+          "entitlements.1.productId": "DR%3a219316800",
+          "entitlements.1.status": "ACTIVE",
+          "entitlements.1.statusReasonCode": "",
+          "entitlements.1.terminationDate": "",
+          "entitlements.1.version": "0",
+          "entitlements.1.userId": "1000002",
+          "entitlements.2.entitlementId": "2000002",
+          "entitlements.2.entitlementTag": "BFBC2%3aPC%3aVIETNAM_PDLC",
+          "entitlements.2.grantDate": "",
+          "entitlements.2.groupName": "BFBC2PC",
+          "entitlements.2.productId": "DR%3a219316800",
+          "entitlements.2.status": "ACTIVE",
+          "entitlements.2.statusReasonCode": "",
+          "entitlements.2.terminationDate": "",
+          "entitlements.2.version": "0",
+          "entitlements.2.userId": "1000002",
+          "entitlements.3.entitlementId": "2000003",
+          "entitlements.3.entitlementTag": "BFBC2%3aPC%3aALLKIT",
+          "entitlements.3.grantDate": "",
+          "entitlements.3.groupName": "BFBC2PC",
+          "entitlements.3.productId": "DR%3a192365600",
+          "entitlements.3.status": "ACTIVE",
+          "entitlements.3.statusReasonCode": "",
+          "entitlements.3.terminationDate": "",
+          "entitlements.3.version": "0",
+          "entitlements.3.userId": "1000002"
+        }
+      },
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "1",
+          "entitlements.0.entitlementId": "2000000",
+          "entitlements.0.entitlementTag": "BFBC2%3aPC%3aADDSVETRANK",
+          "entitlements.0.grantDate": "",
+          "entitlements.0.groupName": "AddsVetRank",
+          "entitlements.0.productId": "",
+          "entitlements.0.status": "ACTIVE",
+          "entitlements.0.statusReasonCode": "",
+          "entitlements.0.terminationDate": "",
+          "entitlements.0.version": "0",
+          "entitlements.0.userId": "1000002"
+        }
+      },
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "0"
+        }
+      }
+    ],
+    "NuGrantEntitlement": [
+      {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGrantEntitlement"
+        }
+      }
+    ],
+    "UpdateStats": [
+      {
+        "magic": "rank",
+        "fragmented": false,
+        "fields": {
+          "TXN": "UpdateStats"
+        }
+      }
+    ]
+  },
+  "client_entitlements": [
+    {
+      "query": {
+        "TXN": "NuGetEntitlements",
+        "global": "1",
+        "groupName": "BFBC2PC",
+        "status": "ACTIVE"
+      },
+      "reply": {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "4",
+          "entitlements.0.entitlementId": "2000000",
+          "entitlements.0.entitlementTag": "ONLINE_ACCESS",
+          "entitlements.0.grantDate": "",
+          "entitlements.0.groupName": "BFBC2PC",
+          "entitlements.0.productId": "DR%3a156691300",
+          "entitlements.0.status": "ACTIVE",
+          "entitlements.0.statusReasonCode": "",
+          "entitlements.0.terminationDate": "",
+          "entitlements.0.version": "0",
+          "entitlements.0.userId": "1000001",
+          "entitlements.1.entitlementId": "2000001",
+          "entitlements.1.entitlementTag": "BFBC2%3aPC%3aVIETNAM_ACCESS",
+          "entitlements.1.grantDate": "",
+          "entitlements.1.groupName": "BFBC2PC",
+          "entitlements.1.productId": "DR%3a219316800",
+          "entitlements.1.status": "ACTIVE",
+          "entitlements.1.statusReasonCode": "",
+          "entitlements.1.terminationDate": "",
+          "entitlements.1.version": "0",
+          "entitlements.1.userId": "1000001",
+          "entitlements.2.entitlementId": "2000002",
+          "entitlements.2.entitlementTag": "BFBC2%3aPC%3aVIETNAM_PDLC",
+          "entitlements.2.grantDate": "",
+          "entitlements.2.groupName": "BFBC2PC",
+          "entitlements.2.productId": "DR%3a219316800",
+          "entitlements.2.status": "ACTIVE",
+          "entitlements.2.statusReasonCode": "",
+          "entitlements.2.terminationDate": "",
+          "entitlements.2.version": "0",
+          "entitlements.2.userId": "1000001",
+          "entitlements.3.entitlementId": "2000003",
+          "entitlements.3.entitlementTag": "BFBC2%3aPC%3aALLKIT",
+          "entitlements.3.grantDate": "",
+          "entitlements.3.groupName": "BFBC2PC",
+          "entitlements.3.productId": "DR%3a192365600",
+          "entitlements.3.status": "ACTIVE",
+          "entitlements.3.statusReasonCode": "",
+          "entitlements.3.terminationDate": "",
+          "entitlements.3.version": "0",
+          "entitlements.3.userId": "1000001"
+        }
+      }
+    },
+    {
+      "query": {
+        "TXN": "NuGetEntitlements",
+        "global": "1",
+        "groupName": "AddsVetRank",
+        "status": "ACTIVE"
+      },
+      "reply": {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "1",
+          "entitlements.0.entitlementId": "2000000",
+          "entitlements.0.entitlementTag": "BFBC2%3aPC%3aADDSVETRANK",
+          "entitlements.0.grantDate": "",
+          "entitlements.0.groupName": "AddsVetRank",
+          "entitlements.0.productId": "",
+          "entitlements.0.status": "ACTIVE",
+          "entitlements.0.statusReasonCode": "",
+          "entitlements.0.terminationDate": "",
+          "entitlements.0.version": "0",
+          "entitlements.0.userId": "1000001"
+        }
+      }
+    },
+    {
+      "query": {
+        "TXN": "NuGetEntitlements",
+        "entitlementTag": "BFBC2:COMMON:GAMESTOP",
+        "global": "1",
+        "groupName": "BattlefieldBadCompany2",
+        "status": "ACTIVE"
+      },
+      "reply": {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "0"
+        }
+      }
+    },
+    {
+      "query": {
+        "TXN": "NuGetEntitlements",
+        "entitlementTag": "BFBC2:PC:LimitedEdition",
+        "global": "1",
+        "groupName": "BFBC2PC",
+        "status": "ACTIVE"
+      },
+      "reply": {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "4",
+          "entitlements.0.entitlementId": "2000000",
+          "entitlements.0.entitlementTag": "ONLINE_ACCESS",
+          "entitlements.0.grantDate": "",
+          "entitlements.0.groupName": "BFBC2PC",
+          "entitlements.0.productId": "DR%3a156691300",
+          "entitlements.0.status": "ACTIVE",
+          "entitlements.0.statusReasonCode": "",
+          "entitlements.0.terminationDate": "",
+          "entitlements.0.version": "0",
+          "entitlements.0.userId": "1000001",
+          "entitlements.1.entitlementId": "2000001",
+          "entitlements.1.entitlementTag": "BFBC2%3aPC%3aVIETNAM_ACCESS",
+          "entitlements.1.grantDate": "",
+          "entitlements.1.groupName": "BFBC2PC",
+          "entitlements.1.productId": "DR%3a219316800",
+          "entitlements.1.status": "ACTIVE",
+          "entitlements.1.statusReasonCode": "",
+          "entitlements.1.terminationDate": "",
+          "entitlements.1.version": "0",
+          "entitlements.1.userId": "1000001",
+          "entitlements.2.entitlementId": "2000002",
+          "entitlements.2.entitlementTag": "BFBC2%3aPC%3aVIETNAM_PDLC",
+          "entitlements.2.grantDate": "",
+          "entitlements.2.groupName": "BFBC2PC",
+          "entitlements.2.productId": "DR%3a219316800",
+          "entitlements.2.status": "ACTIVE",
+          "entitlements.2.statusReasonCode": "",
+          "entitlements.2.terminationDate": "",
+          "entitlements.2.version": "0",
+          "entitlements.2.userId": "1000001",
+          "entitlements.3.entitlementId": "2000003",
+          "entitlements.3.entitlementTag": "BFBC2%3aPC%3aALLKIT",
+          "entitlements.3.grantDate": "",
+          "entitlements.3.groupName": "BFBC2PC",
+          "entitlements.3.productId": "DR%3a192365600",
+          "entitlements.3.status": "ACTIVE",
+          "entitlements.3.statusReasonCode": "",
+          "entitlements.3.terminationDate": "",
+          "entitlements.3.version": "0",
+          "entitlements.3.userId": "1000001"
+        }
+      }
+    },
+    {
+      "query": {
+        "TXN": "NuGetEntitlements",
+        "global": "1",
+        "groupName": "NoVetRank",
+        "status": "ACTIVE"
+      },
+      "reply": {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "0"
+        }
+      }
+    }
+  ],
+  "server_entitlements": [
+    {
+      "query": {
+        "TXN": "NuGetEntitlements",
+        "global": "1",
+        "projectId": "136844",
+        "status": "ACTIVE"
+      },
+      "reply": {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "4",
+          "entitlements.0.entitlementId": "2000000",
+          "entitlements.0.entitlementTag": "ONLINE_ACCESS",
+          "entitlements.0.grantDate": "",
+          "entitlements.0.groupName": "BFBC2PC",
+          "entitlements.0.productId": "DR%3a156691300",
+          "entitlements.0.status": "ACTIVE",
+          "entitlements.0.statusReasonCode": "",
+          "entitlements.0.terminationDate": "",
+          "entitlements.0.version": "0",
+          "entitlements.0.userId": "1000002",
+          "entitlements.1.entitlementId": "2000001",
+          "entitlements.1.entitlementTag": "BFBC2%3aPC%3aVIETNAM_ACCESS",
+          "entitlements.1.grantDate": "",
+          "entitlements.1.groupName": "BFBC2PC",
+          "entitlements.1.productId": "DR%3a219316800",
+          "entitlements.1.status": "ACTIVE",
+          "entitlements.1.statusReasonCode": "",
+          "entitlements.1.terminationDate": "",
+          "entitlements.1.version": "0",
+          "entitlements.1.userId": "1000002",
+          "entitlements.2.entitlementId": "2000002",
+          "entitlements.2.entitlementTag": "BFBC2%3aPC%3aVIETNAM_PDLC",
+          "entitlements.2.grantDate": "",
+          "entitlements.2.groupName": "BFBC2PC",
+          "entitlements.2.productId": "DR%3a219316800",
+          "entitlements.2.status": "ACTIVE",
+          "entitlements.2.statusReasonCode": "",
+          "entitlements.2.terminationDate": "",
+          "entitlements.2.version": "0",
+          "entitlements.2.userId": "1000002",
+          "entitlements.3.entitlementId": "2000003",
+          "entitlements.3.entitlementTag": "BFBC2%3aPC%3aALLKIT",
+          "entitlements.3.grantDate": "",
+          "entitlements.3.groupName": "BFBC2PC",
+          "entitlements.3.productId": "DR%3a192365600",
+          "entitlements.3.status": "ACTIVE",
+          "entitlements.3.statusReasonCode": "",
+          "entitlements.3.terminationDate": "",
+          "entitlements.3.version": "0",
+          "entitlements.3.userId": "1000002"
+        }
+      }
+    },
+    {
+      "query": {
+        "TXN": "NuGetEntitlements",
+        "global": "1",
+        "groupName": "AddsVetRank",
+        "status": "ACTIVE"
+      },
+      "reply": {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "1",
+          "entitlements.0.entitlementId": "2000000",
+          "entitlements.0.entitlementTag": "BFBC2%3aPC%3aADDSVETRANK",
+          "entitlements.0.grantDate": "",
+          "entitlements.0.groupName": "AddsVetRank",
+          "entitlements.0.productId": "",
+          "entitlements.0.status": "ACTIVE",
+          "entitlements.0.statusReasonCode": "",
+          "entitlements.0.terminationDate": "",
+          "entitlements.0.version": "0",
+          "entitlements.0.userId": "1000002"
+        }
+      }
+    },
+    {
+      "query": {
+        "TXN": "NuGetEntitlements",
+        "global": "1",
+        "projectId": "302061",
+        "status": "ACTIVE"
+      },
+      "reply": {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "0"
+        }
+      }
+    },
+    {
+      "query": {
+        "TXN": "NuGetEntitlements",
+        "entitlementTag": "BFBC2:PC:VIETNAM_ACCESS",
+        "global": "1",
+        "status": "ACTIVE"
+      },
+      "reply": {
+        "magic": "acct",
+        "fragmented": false,
+        "fields": {
+          "TXN": "NuGetEntitlements",
+          "entitlements.[]": "0"
+        }
+      }
+    }
+  ],
+  "theater": [
+    {
+      "magic": "CONN",
+      "fields": {
+        "TID": "0",
+        "TIME": "0",
+        "activityTimeoutSecs": "240",
+        "PROT": "2"
+      }
+    },
+    {
+      "magic": "USER",
+      "fields": {
+        "TID": "0",
+        "NAME": "\"LocalViewer\""
+      }
+    },
+    {
+      "magic": "LLST",
+      "fields": {
+        "TID": "0",
+        "NUM-LOBBIES": "1"
+      }
+    },
+    {
+      "magic": "LDAT",
+      "fields": {
+        "TID": "0",
+        "LID": "257",
+        "PASSING": "65",
+        "NAME": "bfbc2PC01",
+        "LOCALE": "en_US",
+        "MAX-GAMES": "10000",
+        "FAVORITE-GAMES": "0",
+        "FAVORITE-PLAYERS": "0",
+        "NUM-GAMES": "65"
+      }
+    },
+    {
+      "magic": "GLST",
+      "fields": {
+        "TID": "0",
+        "LID": "257",
+        "LOBBY-MAX-GAMES": "10000",
+        "LOBBY-NUM-GAMES": "65",
+        "NUM-GAMES": "52"
+      }
+    },
+    {
+      "magic": "GDAT",
+      "fields": {
+        "TID": "0",
+        "LID": "257",
+        "GID": "158078",
+        "TYPE": "G",
+        "HN": "local.replay.server",
+        "HU": "1000002",
+        "N": "\"Local%20Replay\"",
+        "I": "127.0.0.1",
+        "P": "19567",
+        "J": "O",
+        "JP": "0",
+        "QP": "0",
+        "AP": "0",
+        "MP": "32",
+        "F": "0",
+        "NF": "0",
+        "PL": "PC",
+        "PW": "",
+        "B-U-EA": "0",
+        "B-U-Softcore": "0",
+        "B-U-Hardcore": "0",
+        "B-U-HasPassword": "0",
+        "B-U-Punkbuster": "0",
+        "B-version": "ROMEPC133769",
+        "V": "2.0",
+        "B-U-level": "Levels/MP_006CQ",
+        "B-U-gamemode": "CONQUEST",
+        "B-U-sguid": "00000000000000000000000000000000",
+        "B-U-Time": "\"T:0.00%20S:%200.00%20L:%200.00\"",
+        "B-U-hash": "00000000000000000000000000000000",
+        "B-U-region": "EU",
+        "B-U-public": "1",
+        "B-U-elo": "1000",
+        "B-numObservers": "0",
+        "B-maxObservers": "0",
+        "B-U-Provider": "Local",
+        "B-U-gameMod": "BC2",
+        "B-U-QueueLength": "0"
+      }
+    },
+    {
+      "magic": "EGAM",
+      "fields": {
+        "TID": "0",
+        "LID": "257",
+        "GID": "158078"
+      }
+    },
+    {
+      "magic": "EGEG",
+      "fields": {
+        "TID": "0",
+        "LID": "257",
+        "GID": "158078",
+        "PL": "PC",
+        "PID": "1000001",
+        "HUID": "1000002",
+        "TICKET": "1",
+        "EKEY": "AAAAAAAAAAAAAAAAAAAAAA%3d",
+        "I": "127.0.0.1",
+        "P": "19567",
+        "INT-IP": "127.0.0.1",
+        "INT-PORT": "19567",
+        "UGID": "00000000-0000-4000-8000-000000000001"
+      }
+    },
+    {
+      "magic": "GDET",
+      "fields": {
+        "TID": "0",
+        "LID": "257",
+        "GID": "158078",
+        "UGID": "00000000-0000-4000-8000-000000000001",
+        "D-AutoBalance": "1",
+        "D-Crosshair": "1",
+        "D-KillCam": "1",
+        "D-Minimap": "1",
+        "D-MinimapSpotting": "1",
+        "D-ThirdPersonVehicleCameras": "1",
+        "D-ThreeDSpotting": "1",
+        "D-FriendlyFire": "0.0000",
+        "D-BannerUrl0": "",
+        "D-BannerUrl": "",
+        "D-ServerDescriptionCount": "0",
+        "D-pdat00": "",
+        "D-pdat01": "",
+        "D-pdat02": "",
+        "D-pdat03": "",
+        "D-pdat04": "",
+        "D-pdat05": "",
+        "D-pdat06": "",
+        "D-pdat07": "",
+        "D-pdat08": "",
+        "D-pdat09": "",
+        "D-pdat10": "",
+        "D-pdat11": "",
+        "D-pdat12": "",
+        "D-pdat13": "",
+        "D-pdat14": "",
+        "D-pdat15": "",
+        "D-pdat16": "",
+        "D-pdat17": "",
+        "D-pdat18": "",
+        "D-pdat19": "",
+        "D-pdat20": "",
+        "D-pdat21": "",
+        "D-pdat22": "",
+        "D-pdat23": "",
+        "D-pdat24": "",
+        "D-pdat25": "",
+        "D-pdat26": "",
+        "D-pdat27": "",
+        "D-pdat28": "",
+        "D-pdat29": "",
+        "D-pdat30": "",
+        "D-pdat31": ""
+      }
+    },
+    {
+      "magic": "PDAT",
+      "fields": {
+        "TID": "0",
+        "PID": "1000001",
+        "NAME": "\"LocalViewer\"",
+        "UID": "1000001",
+        "LID": "257",
+        "GID": "158078"
+      }
+    }
+  ]
+}

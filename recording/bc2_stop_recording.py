@@ -1,6 +1,6 @@
 """Force the BC2 server recorder to finalize and flush to disk.
 
-Uses the native stop path documented in findings2.md: the ServerPeer update
+Uses the inspected native stop path: the ServerPeer update
 loop detects that DemoControl recording-enabled (+0x24) has been cleared while
 a recorder exists, and then finalizes the ghost + destruction streams, writing
 the in-RAM buffer to disk.
@@ -16,7 +16,7 @@ import sys
 import time
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent
 DEMOS = ROOT / 'demos'
 CONTEXT = 0x19C4CC0
 OFF_DEMO = 0x20

@@ -1,0 +1,59 @@
+name: Build local replay
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: local-replay/requirements-build.txt
+      - name: Install build dependencies
+        working-directory: local-replay
+        run: python -m pip install -r requirements-build.txt
+      - name: Check source imports and names
+        working-directory: local-replay
+        run: python -m pyflakes preview.py preview_config.py server_build.py launcher_panel.py replay backend
+      - name: Compile sources
+        working-directory: local-replay
+        run: python -m compileall -q .
+      - name: Build standalone package
+        shell: pwsh
+        run: ./local-replay/build.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bc2-local-replay-windows
+          path: |
+            local-replay/dist/bc2-local-replay-standalone.zip
+            local-replay/dist/SHA256.txt
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: bc2-local-replay-windows
+          path: release
+      - name: Create draft prerelease and attach package
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" --verify-tag --draft --prerelease --title "BC2 Local Replay $TAG" --notes "Technical preview. Read USER_GUIDE.md in the ZIP. Requires your own supported game/server files and recordings. CI build only; gameplay and fresh-machine validation are separate." release/bc2-local-replay-standalone.zip release/SHA256.txt
