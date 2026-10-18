@@ -25,9 +25,49 @@ The archive's contents, safety and redistribution permissions have not been
 independently verified. Download only files you trust and are entitled to use.
 The setup EXE hash check verifies compatibility, not the safety of the full archive.
 
+### Download the sample recordings from this repository
+
+**The application ZIP does not include any recordings. Download them separately
+before clicking Setup / Build:**
+
+1. Open [recording/recordings_pt1.zip on GitHub](https://github.com/agend07/bc2_replay/blob/main/recording/recordings_pt1.zip).
+2. Click **Download raw file** (the download icon). Save the ZIP to your PC;
+   do not save the GitHub web page as a file.
+   Alternatively, use this [direct ZIP download](https://github.com/agend07/bc2_replay/raw/refs/heads/main/recording/recordings_pt1.zip).
+3. Extract the ZIP to a temporary folder. Open its **`matches/`** directory:
+   it contains two recordings, each with nine companion files. Keep every
+   recording's files together and keep their original names.
+4. Copy the **files from inside `matches/`** into **`demos/` inside your dedicated
+   server folder** — the folder you select as **Server folder** in the controller.
+   Create `demos` if it does not exist. Do **not** put them beside
+   `BC2LocalReplay.exe`, in the client folder, or in `runtime/`.
+5. Check that the files are directly inside `demos/`, not nested under a
+   `matches/`, another `demos/` or a `recordings_pt1/` directory. For example:
+
+   ```text
+   D:\BC2-Server\
+     Frost.Game.Main_Win32_Final.exe
+     demos\
+       patched_20261017_125023_912.fbgd
+       patched_20261017_125023_912.fbgk
+       patched_20261017_125023_912.fbgdd
+       patched_20261017_125023_912.fbgdk
+       patched_20261017_125023_912.fbidd
+       patched_20261017_125023_912.fbidk
+       patched_20261017_125023_912.fbcdd
+       patched_20261017_125023_912.fbcdk
+       patched_20261017_125023_912.txt
+   ```
+
+6. Save the server/client paths in the controller, complete **Setup / Build**,
+   then click **Refresh list** under **Server Recording (demos/)** and choose a
+   match from the **Demo** menu. Click **Start Replay** when ready to start it.
+
 For initial setup, the current default is the Arica Harbor Conquest sample
-`patched_20261017_125023_912`. Place its nine files in `demos/` before Setup / Build.
-Other validated recordings can be selected afterwards.
+`patched_20261017_125023_912`. Its nine files must be present before Setup / Build.
+The archive also contains `patched_20261017_123219_486`; you can select it after
+setup. Sample recordings retain the original gameplay player names and are
+**not anonymized**.
 
 ## 2. Extract and open the application
 
