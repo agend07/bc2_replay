@@ -34,15 +34,22 @@ Other validated recordings can be selected afterwards.
 1. Download the standalone ZIP from GitHub Releases.
 2. **Extract the entire ZIP** into a writable folder. Do not run the EXE from
    inside the ZIP, and do not put it in the game installation folder.
-3. Keep these three files together:
+3. Keep **everything from the ZIP** together:
    - `BC2LocalReplay.exe`
+   - `_internal/` — required libraries/data in the default folder (`onedir`) build;
+     do not delete it or move the EXE away from it.
    - `Redirect.ps1`
    - `USER_GUIDE.md`
+   A comparison `onefile` build has no `_internal/` folder and extracts its runtime
+   temporarily instead. Neither packaging mode is digitally signed.
 4. Open `BC2LocalReplay.exe`. Python is **not required**.
 5. Leave the controller window open while playing. Do not open another controller.
 
-The EXE is unsigned, so Windows/antivirus may warn about it. Only run packages
-from a source you trust. Do not run the entire application as administrator;
+The EXE is unsigned, so Windows/antivirus may warn about it. If the browser or
+antivirus calls the download dangerous, do not disable protection or add an
+exception blindly: report the exact warning and file hash for investigation.
+Different packaging is not proof that a file is safe. Only run packages from a
+source you trust. Do not run the entire application as administrator;
 only the redirect helper needs elevation.
 
 ## 3. Configure paths and perform one-time setup

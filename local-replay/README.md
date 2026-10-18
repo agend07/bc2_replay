@@ -35,15 +35,24 @@ python -m pip install -r requirements-build.txt
 .\build.ps1
 ```
 
-Outputs: `dist/bc2-local-replay-standalone.zip` and `dist/SHA256.txt`.
-The ZIP contains the EXE, redirect helper and user guide. Fixtures are embedded.
+Default: `onedir`, with UPX disabled. Outputs:
+`dist/onedir/bc2-local-replay-standalone.zip` and `dist/onedir/SHA256.txt`.
+The ZIP contains the EXE, `_internal/` runtime directory, redirect helper and guide.
+Keep the entire extracted folder together. Fixtures are included in the runtime.
+
+For a comparison build, run `./build.ps1 -BundleMode onefile`; its outputs are
+under `dist/onefile/`. Both modes remain unsigned. Onedir avoids self-extraction,
+but changing packaging does not establish safety or guarantee browser acceptance.
 Runtime requires Windows; Python is only needed to build or run from source.
 No game files, secrets, local configuration or signing certificate are needed to build.
 The generated EXE is unsigned; antivirus/SmartScreen warnings are possible.
 
 ## GitHub Actions
 
-- Run **Build local replay** manually in Actions to download a build artifact.
+- Run **Build local replay** manually in Actions; choose `onedir` (default) or
+  `onefile` for comparison. Download `bc2-local-replay-windows-onedir` or
+  `bc2-local-replay-windows-onefile` respectively. Each artifact contains a ZIP
+  and its SHA256 checksum. Version-tag builds use `onedir`.
 - Push a tag such as `v0.1.0-preview.1` to create a **draft prerelease** with the ZIP
   and SHA256 checksum. Review and test the draft before publishing it.
 - Workflow configuration: `../.github/workflows/build-local-replay.yml`.

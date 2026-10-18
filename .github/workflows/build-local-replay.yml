@@ -2,6 +2,15 @@ name: Build local replay
 
 on:
   workflow_dispatch:
+    inputs:
+      bundle_mode:
+        description: 'Packaging mode (onedir avoids self-extraction; neither mode is signed)'
+        type: choice
+        options:
+          - onedir
+          - onefile
+        default: onedir
+        required: true
   push:
     tags:
       - 'v*'
@@ -12,6 +21,8 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      BUNDLE_MODE: ${{ inputs.bundle_mode || 'onedir' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -30,17 +41,17 @@ jobs:
         run: python -m compileall -q .
       - name: Build standalone package
         shell: pwsh
-        run: ./local-replay/build.ps1
+        run: ./local-replay/build.ps1 -BundleMode $env:BUNDLE_MODE
       - uses: actions/upload-artifact@v4
         with:
-          name: bc2-local-replay-windows
+          name: bc2-local-replay-windows-${{ env.BUNDLE_MODE }}
           path: |
-            local-replay/dist/bc2-local-replay-standalone.zip
-            local-replay/dist/SHA256.txt
+            local-replay/dist/${{ env.BUNDLE_MODE }}/bc2-local-replay-standalone.zip
+            local-replay/dist/${{ env.BUNDLE_MODE }}/SHA256.txt
           if-no-files-found: error
 
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -48,7 +59,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: bc2-local-replay-windows
+          name: bc2-local-replay-windows-onedir
           path: release
       - name: Create draft prerelease and attach package
         env:
