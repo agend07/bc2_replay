@@ -52,6 +52,26 @@ Different packaging is not proof that a file is safe. Only run packages from a
 source you trust. Do not run the entire application as administrator;
 only the redirect helper needs elevation.
 
+### SmartScreen: "Windows protected your PC" / "Unknown publisher"
+
+Preview builds are **not digitally signed** and may have no established Windows
+reputation. SmartScreen can therefore show "Windows protected your PC" and
+"Publisher: Unknown publisher". This is different from an antivirus naming a
+specific threat, but neither this explanation nor a clean scan proves safety.
+
+Before deciding whether to run the application:
+1. Confirm it came from this project's GitHub Release or Actions build.
+2. Compare the ZIP hash with the accompanying `SHA256.txt`, for example:
+   `Get-FileHash .\bc2-local-replay-standalone.zip -Algorithm SHA256`.
+   Matching hashes check file integrity, not publisher identity or absence of malware.
+3. Scan the entire extracted folder with Microsoft Defender.
+
+If those checks are satisfactory and you choose to trust this unsigned preview,
+SmartScreen's **More info → Run anyway** permits that individual launch, if the
+option is available. Do not disable SmartScreen/Defender globally or add blanket
+exclusions. If a browser labels the file dangerous or antivirus names a threat,
+stop and report the exact warning and hash instead of assuming a false positive.
+
 ## 3. Configure paths and perform one-time setup
 
 The **Setup / Launcher** panel separates its buttons into three groups:
@@ -139,6 +159,15 @@ Do not run two copies of this stack at once.
 If an older backend is still using the ports, Start Replay stops with an error
 rather than silently reusing it. Close the older backend first. Switching matches
 from the same open controller reuses the backend it already started.
+
+**"Local backend port 80 is occupied" and Play stays disabled:** a backend from
+an older application folder may still be running, even after its controller was
+closed. Close BC2 first. In Task Manager → Details, show the **Command line**
+column and identify the old `BC2LocalReplay.exe` process with the `backend`
+argument and the old folder path. End only that old backend, not unrelated
+processes. Then select the Demo in the new controller, click Start Replay, wait
+for the server to start, and Launch Game again. Reinstalling or repeatedly
+clicking Play will not free occupied ports.
 
 If a button reports failure, stop at that step and inspect the newest
 `runtime/launcher_*.private.log` locally. A started process is not yet proof that

@@ -48,6 +48,10 @@ not anonymized.**
 - First-run startup and playback from a freshly extracted folder were confirmed
   on the development PC. Different-PC and disconnected-network validation remain
   pending; this is not a guarantee for every recording/build or camera case.
+- The EXE is unsigned: SmartScreen may show **"Windows protected your PC" / "Unknown
+  publisher"**. See [the safety instructions](local-replay/USER_GUIDE.md#smartscreen-windows-protected-your-pc--unknown-publisher)
+  for source/hash verification and scanning; do not disable protection or assume
+  every warning is a false positive.
 - Use **dummy login credentials only**, never your real online account details.
 - Do not share generated `preview.json`, `runtime/`, private logs or hosts backups.
 - Closing the controller does not stop backend/server processes. Follow the
