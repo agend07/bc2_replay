@@ -102,6 +102,19 @@ jobs:
           $h = (Get-FileHash dinput8.dll -Algorithm SHA256).Hash.ToLower()
           "$h  dinput8.dll" | Set-Content -Encoding ascii dinput8.dll.sha256
           "dinput8.dll sha256: $h"
+      - name: Proxy selftests (probe, ring, recorder incl. per-build profiles, chat, dump)
+        working-directory: rome_proxy
+        shell: pwsh
+        run: |
+          $out = Join-Path $env:RUNNER_TEMP 'selftest'
+          New-Item -ItemType Directory -Force $out | Out-Null
+          $fail = @()
+          foreach ($t in 'client_probe_selftest', 'bc2_ring_selftest', 'client_recorder_selftest', 'client_chat_selftest', 'client_dump_selftest') {
+            "== $t"
+            & ".\out_shared\$t.exe" $out
+            if ($LASTEXITCODE -ne 0) { $fail += $t }
+          }
+          if ($fail) { throw "selftests failed: $($fail -join ', ')" }
       - name: Panel unit tests (after the proxy build, test_real_shared reads out_shared\dinput8.dll)
         working-directory: .
         run: python -m unittest discover -s replay -p "test_*.py"
@@ -122,6 +135,23 @@ jobs:
             dist/${{ env.BUNDLE_MODE }}/bc2-local-replay-standalone.zip
             dist/${{ env.BUNDLE_MODE }}/SHA256.txt
           if-no-files-found: error
+      - name: Assemble the full release zip (panel + proxy dll + builder.exe of this run + committed datapack)
+        if: env.BUNDLE_MODE == 'onedir'
+        shell: pwsh
+        run: |
+          python release_pack.py --builder-exe "$env:GITHUB_WORKSPACE/dist/builder/builder.exe" --proxy rome_proxy/out_shared/dinput8.dll --out dist/release
+          if ($LASTEXITCODE -ne 0) { throw 'release_pack failed' }
+          $zip = Get-ChildItem dist/release -Filter 'bc2-local-replay-*.zip' | Select-Object -First 1
+          python release_pack.py --check $zip.FullName
+          if ($LASTEXITCODE -ne 0) { throw 'release_pack --check failed' }
+      - uses: actions/upload-artifact@v7
+        if: env.BUNDLE_MODE == 'onedir'
+        with:
+          name: bc2-local-replay-release
+          path: |
+            dist/release/bc2-local-replay-*.zip
+            dist/release/bc2-local-replay-*.zip.sha256
+          if-no-files-found: error
 
   release:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
@@ -129,15 +159,21 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: bc2-local-replay-windows-onedir
+          name: bc2-local-replay-release
           path: release
-      - name: Create draft prerelease and attach package
+      - name: Attest build provenance (verify with gh attestation verify <zip> --repo <owner/repo>)
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: release/bc2-local-replay-*.zip
+      - name: Create draft prerelease and attach the full release zip
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
         run: |
-          gh release create "$TAG" --verify-tag --draft --prerelease --title "BC2 Local Replay $TAG" --notes "Technical preview. Read USER_GUIDE.md in the ZIP. Requires your own supported game/server files and recordings. CI build only; gameplay and fresh-machine validation are separate." release/bc2-local-replay-standalone.zip release/SHA256.txt
+          gh release create "$TAG" --verify-tag --draft --prerelease --title "BC2 Local Replay $TAG" --notes "Technical preview. Read USER_GUIDE.md in the ZIP. Requires your own supported game/server files and recordings. Built by this repository's GitHub Actions workflow from the tagged commit (panel, proxy dll, builder, data pack); verify with: gh attestation verify <zip> --repo $GH_REPO. Gameplay and fresh-machine validation are separate." release/bc2-local-replay-*.zip release/bc2-local-replay-*.zip.sha256

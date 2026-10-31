@@ -167,8 +167,8 @@ entries under one top-level folder `bc2-local-replay-<version>/`, with
 `SHA256.txt` inside listing every file in sha256sum format) and
 `bc2-local-replay-<version>.zip.sha256` next to it.
 
-Then upload the ZIP and the `.zip.sha256` file by hand as assets of the GitHub
-Release. Binaries are never committed.
+The local zip is for checking; the published assets come from CI (tag push, see GitHub
+Actions below). Binaries are never committed.
 
 **Version rule.** One version string is shared by the panel, the `dinput8.dll`
 proxy and the builder, and `test_version_sync.py` checks that they agree. Bump
@@ -183,17 +183,20 @@ build differs from the panel.
   `onefile` for comparison. Download `bc2-local-replay-windows-onedir` or
   `bc2-local-replay-windows-onefile` respectively. Each artifact contains a ZIP
   and its SHA256 checksum. Version-tag builds use `onedir`.
-- The workflow builds the panel ZIP (EXE, `_internal/`, `Redirect.ps1`,
-  `USER_GUIDE.md`, `builder\builder.exe`) as a smoke build. It does not include
-  the proxy or the data pack.
+- The workflow builds the proxy `dinput8.dll` (MSVC x86) and runs its selftests, the panel
+  ZIP (EXE, `_internal/`, `Redirect.ps1`, `USER_GUIDE.md`, `builder\builder.exe`), and in
+  `onedir` mode the full release ZIP with `release_pack.py` (panel + proxy + the builder of
+  the same run + the committed data pack, then `--check`), uploaded as `bc2-local-replay-release`.
 - Its `builder` job runs `go vet` and `go test` on `builder_go\` (the exams that
   need private capture data skip), builds `builder.exe` twice (the second time
   with an empty build cache), fails when the two SHA-256 differ, and uploads it
   as `bc2-builder-exe`; `build.ps1 -BuilderExe` puts it into the package.
-- Push a tag such as `v0.1.0-preview.4` to create a **draft prerelease**. Its
-  asset is that panel ZIP with its SHA256 checksum. Before publishing,
-  the maintainer replaces the asset with the full ZIP from `release_pack.py`
-  (see above). Review and test the draft before publishing it.
+- Push a tag such as `v0.1.0-preview.4` to create a **draft prerelease** whose assets are
+  that full release ZIP and its `.zip.sha256`, with a GitHub build-provenance attestation:
+  anyone can check that the ZIP was built by this workflow from the tagged commit with
+  `gh attestation verify bc2-local-replay-<version>.zip --repo <owner>/bc2_replay`.
+  The CI dll is compiled by the runner's MSVC, so its bytes can differ from a local build:
+  download the draft's ZIP, **Prepare** and record a short round before publishing it.
 - Workflow configuration: `.github/workflows/build-local-replay.yml`.
 
 CI compiles and packages the application; it does not validate game connection,
