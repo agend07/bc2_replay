@@ -94,7 +94,7 @@ folder normally does not. Close the game and the server first. The panel and the
 `out_shared\dinput8.dll` (`proxy\dinput8.dll` in the zip).
 
 The build embeds the release version (`version.h`, `BC2_VERSION_STRING`). It shows in the panel's proxy status
-(`build 0.1.0-preview.4`) and as the first line of each `*_<pid>.log` under `%LOCALAPPDATA%\BC2Replay\logs\`. The
+(`build 0.1.0-preview.5`) and as the first line of each `*_<pid>.log` under `%LOCALAPPDATA%\BC2Replay\logs\`. The
 panel's checks fail on a version mismatch between the installed proxy and the panel; **Prepare** from the extracted
 zip upgrades it.
 

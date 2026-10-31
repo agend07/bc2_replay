@@ -12,7 +12,7 @@ def get_app_root():
 APP_ROOT = get_app_root()
 # r266: one release version shared with rome_proxy\version.h (BC2_VERSION_STRING) and the builder's
 # builder.json "version"; shown in the window title, `preview.py --version`, check-setup and the release zip name.
-VERSION = '0.1.0-preview.4'
+VERSION = '0.1.0-preview.5'
 CONFIG = APP_ROOT / 'preview.json'
 # Intermediate server build written by releases up to 0.1.0-preview.4; now derived in memory only
 # (server_build.build). Nothing requires it; Clean up still deletes a leftover copy.

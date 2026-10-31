@@ -1,4 +1,4 @@
-# BC2 Local Replay 0.1.0-preview.4 — tester checklist
+# BC2 Local Replay 0.1.0-preview.5 — tester checklist
 
 This checklist walks a clean Windows account through the whole preview, one step at
 a time: install, one recorded online round, building a demo from that round, playing
@@ -12,8 +12,8 @@ should see (`Expected:`), and what to record. The background for each step is in
   already beside it (normal online Rome works).
 - The dedicated server folder from the MediaFire archive (it contains
   `Frost.Game.Main_Win32_Final.exe`).
-- The release files `bc2-local-replay-0.1.0-preview.4.zip` and
-  `bc2-local-replay-0.1.0-preview.4.zip.sha256`. You do not need Python or the repository.
+- The release files `bc2-local-replay-0.1.0-preview.5.zip` and
+  `bc2-local-replay-0.1.0-preview.5.zip.sha256`. You do not need Python or the repository.
 - A way to take screenshots (Win+Shift+S) and a text file for notes.
 
 **Time:** about 60–90 minutes. One online round takes 20–30 minutes and a build
@@ -31,14 +31,14 @@ game's process id. The same `<pid>` links the three logs of one game session.
    PowerShell in that folder and run:
 
    ```powershell
-   (Get-FileHash .\bc2-local-replay-0.1.0-preview.4.zip -Algorithm SHA256).Hash -eq (Get-Content .\bc2-local-replay-0.1.0-preview.4.zip.sha256).Split(' ')[0]
+   (Get-FileHash .\bc2-local-replay-0.1.0-preview.5.zip -Algorithm SHA256).Hash -eq (Get-Content .\bc2-local-replay-0.1.0-preview.5.zip.sha256).Split(' ')[0]
    ```
 
    It must print `True`. If it prints `False`, stop and report both hashes.
    - Record: a screenshot of the PowerShell output.
 
 2. **Extract and start.** Extract the **whole** ZIP into a writable folder (not the
-   game folder, not inside the ZIP). Open `bc2-local-replay-0.1.0-preview.4\BC2LocalReplay.exe`.
+   game folder, not inside the ZIP). Open `bc2-local-replay-0.1.0-preview.5\BC2LocalReplay.exe`.
    SmartScreen may warn, because the EXE is unsigned. USER_GUIDE section 2 explains what to check first.
    - Expected: the window title ends in `— controls`, and the Setup section `Setup — paths, Prepare and Clean up` is open.
    - Expected: the summary reads `Setup needed: set both paths, then click Prepare.`
@@ -83,7 +83,7 @@ game's process id. The same `<pid>` links the three logs of one game session.
    - Record: a screenshot of the `/rec status` reply, plus the `.bc2raw` file name, size and round length.
 
 7. **Crash-dump check (no crash needed).** Open the `dump_<pid>.log` with the same
-   `<pid>` as the recorder log from step 6. Its first line names the version 0.1.0-preview.4.
+   `<pid>` as the recorder log from step 6. Its first line names the version 0.1.0-preview.5.
    - Expected: a line containing `filter installed prev=`.
    - Expected: a line containing `re-asserted over` with the value 0x00401570, ending in `(now the chain target)`.
    - If no `re-asserted over` line exists, or it shows a different value, report the whole file.

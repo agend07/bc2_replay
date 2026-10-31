@@ -119,7 +119,7 @@ Before deciding whether to run the application:
 1. Confirm it came from this project's GitHub Release or Actions build.
 2. Compare the ZIP hash with the `.zip.sha256` file published next to the ZIP
    on the Release, for example:
-   `Get-FileHash .\bc2-local-replay-0.1.0-preview.4.zip -Algorithm SHA256`.
+   `Get-FileHash .\bc2-local-replay-0.1.0-preview.5.zip -Algorithm SHA256`.
    `SHA256.txt` inside the ZIP lists every extracted file; run `Get-FileHash`
    on any file and compare by hand.
    Matching hashes check file integrity, not publisher identity or absence of malware.
