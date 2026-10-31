@@ -190,7 +190,7 @@ build differs from the panel.
   need private capture data skip), builds `builder.exe` twice (the second time
   with an empty build cache), fails when the two SHA-256 differ, and uploads it
   as `bc2-builder-exe`; `build.ps1 -BuilderExe` puts it into the package.
-- Push a tag such as `v0.1.0-preview.3` to create a **draft prerelease**. Its
+- Push a tag such as `v0.1.0-preview.4` to create a **draft prerelease**. Its
   asset is that panel ZIP with its SHA256 checksum. Before publishing,
   the maintainer replaces the asset with the full ZIP from `release_pack.py`
   (see above). Review and test the draft before publishing it.

@@ -9,7 +9,7 @@
 #ifndef BC2_VERSION_H
 #define BC2_VERSION_H
 
-#define BC2_VERSION_STRING "0.1.0-preview.3"
+#define BC2_VERSION_STRING "0.1.0-preview.4"
 #define BC2_DLL_VERSION    2u   /* .bc2raw header field 44 (u32); 1 = r248..r263 builds */
 #define BC2_VERSION_MARKER "BC2_PROXY_VERSION=" BC2_VERSION_STRING
 #define BC2_SHARED_MARKER  "BC2_REPLAY_PATCH"

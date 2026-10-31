@@ -22,6 +22,9 @@ unsigned bc2_recorder_selftest_qskip(void);
 void bc2_recorder_selftest_apply_fixups(unsigned char *code, DWORD ring, DWORD code_addr);
 void bc2_recorder_selftest_jmp_bytes(DWORD site, DWORD target, BYTE out[5]);
 unsigned bc2_recorder_selftest_drain_once(const char *dir, char *path_out);
+int bc2_recorder_selftest_cave_apply_profile(unsigned char *code, DWORD code_addr, const char *profile);
+int bc2_recorder_selftest_use_profile(const char *profile);
+DWORD bc2_recorder_selftest_vt_connection(void);
 extern DWORD bc2_tgt_ctor, bc2_tgt_connect_ret, bc2_tgt_getter, bc2_tgt_destroy_ret;
 
 static int fails;
@@ -235,6 +238,43 @@ int main(int argc, char **argv)
     bc2_recorder_selftest_jmp_bytes(0x0065642Fu, 0x10001000u, jb);
     rel = 0x10001000u - 0x00656434u;
     check(jb[0] == 0xe9 && memcmp(jb + 1, &rel, 4) == 0, "jmp bytes: e9 + (target - (site + 5))");
+
+    /* 1b. r302 per-build profiles: retail = byte-identical, Steam = 5 literals + resume rel32 retargeted */
+    memcpy(code, bc2_cave_code, BC2_CAVE_CODE_LEN);
+    bc2_recorder_selftest_apply_fixups(code, BC2_CAVE_TEST_RING, BC2_CAVE_TEST_CODE);
+    check(bc2_recorder_selftest_cave_apply_profile(code, BC2_CAVE_TEST_CODE, "retail")
+              && sha256(code, BC2_CAVE_CODE_LEN, hash) && memcmp(hash, bc2_cave_test_sha256, 32) == 0,
+          "profile retail: relocated cave unchanged (SHA == bc2_cave_test_sha256)");
+    memcpy(code, bc2_cave_code, BC2_CAVE_CODE_LEN);
+    bc2_recorder_selftest_apply_fixups(code, BC2_CAVE_TEST_RING, BC2_CAVE_TEST_CODE);
+    {
+        static const struct { unsigned off; DWORD v; } STEAM_LIT[5] = {
+            { 356, 0x0140E8D8u }, { 676, 0x015724B4u }, { 693, 0x01572458u }, { 699, 0x01434098u }, { 711, 0x01572460u } };
+        unsigned char ref[BC2_CAVE_CODE_LEN];
+        DWORD v, off = bc2_cave_code_fixups[0];
+        int lit_ok = 1, rest_ok = 1;
+        unsigned k;
+        memcpy(ref, code, BC2_CAVE_CODE_LEN);
+        check(bc2_recorder_selftest_cave_apply_profile(code, BC2_CAVE_TEST_CODE, "steam"), "profile steam: cave layout accepted");
+        for (k = 0; k < 5; k++) {
+            memcpy(&v, code + STEAM_LIT[k].off, 4);
+            lit_ok &= v == STEAM_LIT[k].v;
+            memcpy(ref + STEAM_LIT[k].off, &STEAM_LIT[k].v, 4);
+        }
+        check(lit_ok, "profile steam: the 5 cave literals hold the r301 Steam values");
+        memcpy(&v, code + off, 4);
+        check(code[off - 1] == 0xe9 && BC2_CAVE_TEST_CODE + off + 4 + v == 0x009AD38Du, "profile steam: cave jmp resumes at 0x9AD38D");
+        memcpy(ref + off, &v, 4);
+        rest_ok = memcmp(ref, code, BC2_CAVE_CODE_LEN) == 0;
+        check(rest_ok, "profile steam: no other cave byte changed");
+        check(!bc2_recorder_selftest_cave_apply_profile(code, BC2_CAVE_TEST_CODE, "steam"),
+              "profile steam: applying twice is refused (literal check)");
+    }
+    check(bc2_recorder_selftest_use_profile("steam") && bc2_recorder_selftest_vt_connection() == 0x0141AE18u
+              && bc2_tgt_ctor == 0x00560130u && bc2_tgt_connect_ret == 0x0065DFC4u && bc2_tgt_getter == 0x00806BF0u
+              && bc2_tgt_destroy_ret == 0x00645180u, "profile steam: C-side targets + vtable switched");
+    check(bc2_recorder_selftest_use_profile("retail") && bc2_recorder_selftest_vt_connection() == 0x014182A8u
+              && bc2_tgt_ctor == 0x005585A0u && bc2_tgt_connect_ret == 0x00656434u, "profile retail restored");
 
     /* ring */
     ring_mem = VirtualAlloc(NULL, BC2_RING_HDR + BC2_RING_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);

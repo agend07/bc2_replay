@@ -194,7 +194,8 @@ func LevelOf(path string) string {
 // Extract is bc2raw.extract: split a .bc2raw into a v3 capture dir (refuses an existing dir): m-log.bin (the
 // P/G/C/M/B records verbatim), raw-log.bin (S/T/E/Q/O verbatim), m-summary.json and capture.json (the returned
 // manifest: level from the first valid S, else level; label; recorded = header FILETIME as local ISO, else the
-// file's mtime).
+// file's mtime; exe {build, vt_translated} when the header names a known exe). A Steam capture's vtable fields are
+// rewritten to retail values first (NormalizeSteam), so every later stage sees retail values only.
 func Extract(path, outDir, level, label string) (*pyc.Object, error) {
 	out := pathStr(outDir)
 	if _, err := os.Stat(out); err == nil {
@@ -203,6 +204,12 @@ func Extract(path, outDir, level, label string) (*pyc.Object, error) {
 	h, fr, trunc, err := Frames(path)
 	if err != nil {
 		return nil, err
+	}
+	build, nvt := ExeBuild(h.ExeSHA256), 0
+	if build == ExeSteam { // the single Steam -> retail point: everything after extract reads these files
+		if nvt, err = NormalizeSteam(fr); err != nil {
+			return nil, err
+		}
 	}
 	recs := make([]Record, len(fr))
 	var mlog, rlog []byte
@@ -286,6 +293,12 @@ func Extract(path, outDir, level, label string) (*pyc.Object, error) {
 	m.Set("paired", false)
 	m.Set("recorded", rec)
 	m.Set("source", src)
+	if build != "" { // r302: the recording exe; vt_translated = vtable fields rewritten Steam -> retail
+		exe := pyc.NewObject()
+		exe.Set("build", build)
+		exe.Set("vt_translated", nvt)
+		m.Set("exe", exe)
+	}
 	if err := writeJSON(filepath.Join(out, "capture.json"), m, pyc.DumpOptions{Indent: 1}); err != nil {
 		return nil, err
 	}

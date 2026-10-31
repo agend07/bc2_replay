@@ -57,6 +57,9 @@ func Extract(path, name, level, label string, say Say) int {
 	if truthy(get(s, "truncated")) {
 		line += ", TRUNCATED tail"
 	}
+	if e := getObj(m, "exe"); e != nil && pyStr(get(e, "build")) == capture.ExeSteam {
+		say(fmt.Sprintf("  exe steam: %s vtable fields translated", pyStr(get(e, "vt_translated"))))
+	}
 	say(line)
 	say("RESULT: OK " + out)
 	return 0

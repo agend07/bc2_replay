@@ -448,7 +448,7 @@ def busy_reason(owned_state, building=False):
 # ---------- r287: one row per round, auto-extract ----------
 
 MIN_ROUND_S = 30  # shorter rounds are listed greyed as 'too short' (no play / build)
-RAW_SETTLE_S = 60  # a raw written to within this many seconds may still be recording: not extracted yet
+RAW_SETTLE_S = 60  # fallback when writer_closed() cannot tell: a raw written to this recently may still be recording
 SHORT_STATUS = 'too short'
 
 
@@ -577,9 +577,30 @@ def _mtime(path):
         return None
 
 
-def raws_to_extract(items, now, tried=(), mtime=_mtime):
-    """Raw items the window extracts by itself, oldest first: a valid header (reason 'raw capture: ...'), a known mtime
-    at least RAW_SETTLE_S before now (else it may still be recording), not tried yet in this window (tried: paths)."""
+def writer_closed(path):
+    """True when no process holds path open for writing, False while one does, None when unknown (not Windows, missing
+    file, other error). The recorder dll opens its .bc2raw with GENERIC_WRITE and FILE_SHARE_READ for the whole connection
+    and closes it at the end record, so a read open that shares only reading fails with a sharing violation exactly
+    while it still records."""
+    if os.name != 'nt':
+        return None
+    import ctypes
+    from ctypes import wintypes
+    k32 = ctypes.WinDLL('kernel32', use_last_error=True)
+    k32.CreateFileW.restype = wintypes.HANDLE
+    k32.CreateFileW.argtypes = (wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID, wintypes.DWORD,
+                                wintypes.DWORD, wintypes.HANDLE)
+    h = k32.CreateFileW(str(path), 0x80000000, 0x1, None, 3, 0x80, None)  # GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING
+    if h is None or h == wintypes.HANDLE(-1).value:
+        return False if ctypes.get_last_error() == 32 else None  # 32 = ERROR_SHARING_VIOLATION
+    k32.CloseHandle(wintypes.HANDLE(h))
+    return True
+
+
+def raws_to_extract(items, now, tried=(), mtime=_mtime, closed=writer_closed):
+    """Raw items the window extracts by itself, oldest first: a valid header (reason 'raw capture: ...'), a known mtime,
+    not still recording, not tried yet in this window (tried: paths). Still recording = the writer holds the file open
+    (closed(path) False); when that is unknown (None), the old rule: written to within RAW_SETTLE_S."""
     out = []
     for item in items or []:
         if not is_raw(item) or not item.get('path') or item['path'] in tried:
@@ -588,7 +609,10 @@ def raws_to_extract(items, now, tried=(), mtime=_mtime):
         if reason and not reason.startswith('raw capture'):
             continue  # bad .bc2raw: extracting it would only fail
         mt = mtime(item['path'])
-        if mt is None or now - mt < RAW_SETTLE_S:
+        if mt is None:
+            continue
+        state = closed(item['path'])
+        if state is False or (state is None and now - mt < RAW_SETTLE_S):
             continue
         out.append((mt, item))
     return [item for _mt, item in sorted(out, key=lambda t: t[0])]

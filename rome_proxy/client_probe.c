@@ -7,40 +7,76 @@
 #include "client_probe.h"
 #include "version.h"
 
-/* ---- identity of the retail BFBC2Game.exe (SHA-256 3911fcc8...3d54258) ---- */
+/* ---- known BFBC2Game.exe builds (r302; Steam addresses: report r301, offline-decrypted .text) ---- */
 #define EXE_BASE        0x00400000u
-#define EXE_TIMESTAMP   0x4E55445Du
-#define EXE_SIZEOFIMAGE 0x01913000u
 
-static const BYTE EXE_SHA256[32] = {
-    0x39, 0x11, 0xfc, 0xc8, 0x91, 0x4b, 0x01, 0x58, 0xc4, 0x34, 0xce, 0xe3, 0x6f, 0x19, 0x29, 0x53,
-    0x16, 0xe7, 0x15, 0xd4, 0xc9, 0xa0, 0xe7, 0x0c, 0x85, 0x7e, 0x8c, 0x39, 0xe3, 0xd5, 0x42, 0x58
+static const bc2_rec_profile PROFILES[] = {
+    { "retail", 0x4E55445Du, 0x01913000u,   /* SHA-256 3911fcc8...3d54258 */
+      { 0x39, 0x11, 0xfc, 0xc8, 0x91, 0x4b, 0x01, 0x58, 0xc4, 0x34, 0xce, 0xe3, 0x6f, 0x19, 0x29, 0x53,
+        0x16, 0xe7, 0x15, 0xd4, 0xc9, 0xa0, 0xe7, 0x0c, 0x85, 0x7e, 0x8c, 0x39, 0xe3, 0xd5, 0x42, 0x58 },
+      0,
+      0x0065642Fu, 0x00656434u, 0x005585A0u,
+      0x0063D5EBu, 0x0063D5F0u, 0x007FF060u,
+      0x00C299A7u, 0x00C299ADu,
+      0x00BEDF59u, 0x00505C1Cu, 0x00656446u,
+      0x01571410u, 0x01571430u, 0x01571434u,
+      0x014182A8u, 0x0147D218u, 0x0147D04Cu, 0x01432090u,
+      { 0x0140D8C8u, 0x01571434u, 0x015713D8u, 0x01431530u, 0x015713E0u } },
+    { "steam", 0x4E55462Fu, 0x01970000u,    /* SHA-256 22e96001...65f38c96, SteamStub 2.1 */
+      { 0x22, 0xe9, 0x60, 0x01, 0x38, 0x2e, 0xb8, 0x47, 0xe0, 0x4f, 0x14, 0x6e, 0x74, 0xc6, 0xc4, 0x9e,
+        0x38, 0x46, 0x5f, 0x7e, 0xc7, 0xbb, 0x79, 0xba, 0x47, 0xe0, 0x41, 0x46, 0xe7, 0x4c, 0x6c, 0x49 },
+      1,
+      0x0065DFBFu, 0x0065DFC4u, 0x00560130u,
+      0x0064517Bu, 0x00645180u, 0x00806BF0u,
+      0x009AD387u, 0x009AD38Du,
+      0x009715D9u, 0x00505C1Cu, 0x0065DFD6u,
+      0x01572490u, 0x015724B0u, 0x015724B4u,
+      0x0141AE18u, 0x01445A78u, 0x014458A4u, 0x01434BF8u,
+      /* last = ctx+8 child: derived from g_ClientContext+8 (no code refs in either build), r301 "probable" */
+      { 0x0140E8D8u, 0x015724B4u, 0x01572458u, 0x01434098u, 0x01572460u } },
 };
+#define N_PROFILES ((int)(sizeof(PROFILES) / sizeof(PROFILES[0])))
 
-/* In-memory bytes of every future hook / read site; all must match or the probe exits. */
+/* In-memory bytes of every hook / read site (identical in both builds, r301); all must match or the probe exits. */
+enum { S_CONNECT, S_DESTROY, S_DISPATCHER, S_CAVE, S_WRAPPER, S_GETTER, S_ALT_CONNECT, N_SITES };
 static const struct {
-    DWORD va;
     DWORD len;
     BYTE bytes[8];
     const char *name;
-} SITES[] = {
-    { 0x0065642F, 5, { 0xe8, 0x6c, 0x21, 0xf0, 0xff }, "connect: call ClientConnection_Ctor 0x5585A0" },
-    { 0x0063D5EB, 5, { 0xe8, 0x70, 0x1a, 0x1c, 0x00 }, "DestroyConnection: call g_ClientContext getter 0x7FF060" },
-    { 0x00BEDF59, 7, { 0x83, 0xbe, 0x9c, 0x01, 0x00, 0x00, 0x00 }, "dispatcher: cmp [esi+0x19C], 0 (packet callback)" },
-    { 0x00C299A7, 6, { 0x8b, 0x97, 0x38, 0x02, 0x00, 0x00 }, "ghost manager: mov edx, [edi+0x238]" },
-    { 0x00505C1C, 3, { 0x89, 0x46, 0x04 }, "control BitStream wrapper store: mov [esi+4], eax" },
-    { 0x007FF060, 5, { 0xb8, 0x01, 0x00, 0x00, 0x00 }, "g_ClientContext getter entry: mov eax, 1" },
-    { 0x00656446, 5, { 0xe8, 0x15, 0x8c, 0x1a, 0x00 }, "connect: call g_ClientContext getter (alt site)" },
+} SITES[N_SITES] = {
+    { 5, { 0xe8, 0x6c, 0x21, 0xf0, 0xff }, "connect: call ClientConnection_Ctor" },
+    { 5, { 0xe8, 0x70, 0x1a, 0x1c, 0x00 }, "DestroyConnection: call g_ClientContext getter" },
+    { 7, { 0x83, 0xbe, 0x9c, 0x01, 0x00, 0x00, 0x00 }, "dispatcher: cmp [esi+0x19C], 0 (packet callback)" },
+    { 6, { 0x8b, 0x97, 0x38, 0x02, 0x00, 0x00 }, "ghost manager: mov edx, [edi+0x238]" },
+    { 3, { 0x89, 0x46, 0x04 }, "control BitStream wrapper store: mov [esi+4], eax" },
+    { 5, { 0xb8, 0x01, 0x00, 0x00, 0x00 }, "g_ClientContext getter entry: mov eax, 1" },
+    { 5, { 0xe8, 0x15, 0x8c, 0x1a, 0x00 }, "connect: call g_ClientContext getter (alt site)" },
 };
 
-/* ---- game globals, offsets and vtables read by the poll loop ---- */
-#define G_LEVEL          0x01571410u /* current level object */
-#define G_CONN           0x01571430u /* g_ClientContext+0x58 = ClientConnection */
-#define G_CTX_READY      0x01571434u /* bit 0 = context ready */
-#define VT_CONNECTION    0x014182A8u
-#define VT_MUX_DIRECT    0x0147D218u /* ConnectionStreamMux */
-#define VT_MUX_FRAGMENT  0x0147D04Cu /* ConnectionFragmentStream */
-#define VT_LEVEL         0x01432090u
+static DWORD site_va(const bc2_rec_profile *p, int i)
+{
+    switch (i) {
+    case S_CONNECT: return p->site_connect;
+    case S_DESTROY: return p->site_destroy;
+    case S_DISPATCHER: return p->site_dispatcher;
+    case S_CAVE: return p->cave_site;
+    case S_WRAPPER: return p->site_wrapper_store;
+    case S_GETTER: return p->tgt_getter;
+    default: return p->site_alt_connect;
+    }
+}
+
+/* ---- game globals and vtables read by the poll loop: from the identified profile (retail until then) ---- */
+static const bc2_rec_profile *g_p = &PROFILES[0];
+#define G_LEVEL          (g_p->g_level)          /* current level object */
+#define G_CONN           (g_p->g_conn)           /* g_ClientContext+0x58 = ClientConnection */
+#define G_CTX_READY      (g_p->g_ctx_ready)      /* bit 0 = context ready */
+#define VT_CONNECTION    (g_p->vt_connection)
+#define VT_MUX_DIRECT    (g_p->vt_mux_direct)    /* ConnectionStreamMux */
+#define VT_MUX_FRAGMENT  (g_p->vt_mux_fragment)  /* ConnectionFragmentStream */
+#define VT_LEVEL         (g_p->vt_level)
+
+/* ---- offsets read by the poll loop (same in both builds) ---- */
 #define OFF_DISPATCHER   0x2Cu       /* control+0xC */
 #define OFF_PKT_STATE    0x34u       /* control BitStream wrapper +4 */
 #define OFF_PKT_BITS     0x08u       /* [state+8] = bit count */
@@ -169,51 +205,91 @@ static int sha256_file(const char *path, BYTE out[32])
     return ok;
 }
 
-int bc2_client_probe_gate(char *why)
+const bc2_rec_profile *bc2_rec_profile_by_name(const char *name)
+{
+    int i;
+    for (i = 0; i < N_PROFILES; i++)
+        if (lstrcmpA(PROFILES[i].name, name) == 0)
+            return &PROFILES[i];
+    return NULL;
+}
+
+const bc2_rec_profile *bc2_client_probe_identify(char *why)
 {
     DWORD base = (DWORD)(UINT_PTR)GetModuleHandleA(NULL), lfanew = 0;
     IMAGE_NT_HEADERS32 nt;
+    const bc2_rec_profile *p = NULL;
     char exe[MAX_PATH];
     BYTE hash[32];
     DWORD n;
-    int i, rc;
+    int i;
 
     if (base != EXE_BASE) {
         wsprintfA(why, "exe base mismatch (%08lx)", (unsigned long)base);
-        return 0;
+        return NULL;
     }
     if (!rd32(base + 0x3C, &lfanew) || lfanew > 0x1000 || !rdbuf(base + lfanew, &nt, sizeof(nt))
         || nt.Signature != IMAGE_NT_SIGNATURE) {
         wsprintfA(why, "no PE header");
-        return 0;
+        return NULL;
     }
-    if (nt.FileHeader.TimeDateStamp != EXE_TIMESTAMP || nt.OptionalHeader.SizeOfImage != EXE_SIZEOFIMAGE) {
+    for (i = 0; i < N_PROFILES && !p; i++)
+        if (nt.FileHeader.TimeDateStamp == PROFILES[i].timestamp && nt.OptionalHeader.SizeOfImage == PROFILES[i].size_of_image)
+            p = &PROFILES[i];
+    if (!p) {
         wsprintfA(why, "PE mismatch (timestamp %08lx, image size %08lx)",
                   (unsigned long)nt.FileHeader.TimeDateStamp, (unsigned long)nt.OptionalHeader.SizeOfImage);
-        return 0;
+        return NULL;
     }
     n = GetModuleFileNameA(NULL, exe, sizeof(exe));
     if (n == 0 || n >= sizeof(exe)) {
         wsprintfA(why, "cannot query exe path");
-        return 0;
+        return NULL;
     }
     if (!sha256_file(exe, hash)) {
         wsprintfA(why, "cannot hash exe file");
-        return 0;
+        return NULL;
     }
-    if (memcmp(hash, EXE_SHA256, 32) != 0) {
-        wsprintfA(why, "exe SHA-256 mismatch (%02x%02x%02x%02x...)", hash[0], hash[1], hash[2], hash[3]);
-        return 0;
+    if (memcmp(hash, p->sha256, 32) != 0) {
+        wsprintfA(why, "exe SHA-256 mismatch for the %s PE stamp (%02x%02x%02x%02x...)", p->name, hash[0], hash[1],
+                  hash[2], hash[3]);
+        return NULL;
     }
-    for (i = 0; i < (int)(sizeof(SITES) / sizeof(SITES[0])); i++) {
-        rc = cmpmem(SITES[i].va, SITES[i].bytes, SITES[i].len);
+    return p;
+}
+
+int bc2_client_probe_sites_ok(const bc2_rec_profile *p, char *why)
+{
+    int i, rc;
+    for (i = 0; i < N_SITES; i++) {
+        rc = cmpmem(site_va(p, i), SITES[i].bytes, SITES[i].len);
         if (rc != 1) {
-            wsprintfA(why, "site %08lx %s (%s)", (unsigned long)SITES[i].va,
-                      rc < 0 ? "unreadable" : "bytes differ", SITES[i].name);
+            wsprintfA(why, "site %08lx %s (%s, %s)", (unsigned long)site_va(p, i),
+                      rc < 0 ? "unreadable" : "bytes differ", SITES[i].name, p->name);
             return 0;
         }
     }
     return 1;
+}
+
+int bc2_client_probe_gate(char *why)
+{
+    const bc2_rec_profile *p = bc2_client_probe_identify(why);
+    return p && bc2_client_probe_sites_ok(p, why);
+}
+
+/* Steam: .text is decrypted by the stub after DllMain; poll the site bytes (cmpmem 0 or -1 = not yet) until
+ * timeout_ms. Returns the ms waited, or -1 on timeout (why = the last mismatch). */
+int bc2_client_probe_wait_sites(const bc2_rec_profile *p, DWORD timeout_ms, char *why)
+{
+    DWORD t0 = GetTickCount();
+    for (;;) {
+        if (bc2_client_probe_sites_ok(p, why))
+            return (int)(GetTickCount() - t0);
+        if (GetTickCount() - t0 >= timeout_ms)
+            return -1;
+        Sleep(2);
+    }
 }
 
 /* LEVEL <ptr> vt <vt> "<name>"; name only for the known level vtable and a sane range. */
@@ -272,12 +348,20 @@ static DWORD WINAPI probe_thread(LPVOID arg)
     if (!bc2_client_probe_log_path(g_log_path, sizeof(g_log_path), 1))
         g_log_path[0] = 0;
     probe_log("version " BC2_VERSION_STRING);  /* r266: first line of every probe_<pid>.log */
-    if (!bc2_client_probe_gate(why)) {
-        wsprintfA(line, "GATE fail %s", why);
+    {
+        const bc2_rec_profile *p = bc2_client_probe_identify(why);
+        int waited = 0;
+        if (p)
+            waited = p->deferred ? bc2_client_probe_wait_sites(p, 120000, why) : (bc2_client_probe_sites_ok(p, why) ? 0 : -1);
+        if (!p || waited < 0) {
+            wsprintfA(line, "GATE fail %s", why);
+            probe_log(line);
+            return 0;
+        }
+        g_p = p;
+        wsprintfA(line, "GATE ok (%s, sites after %d ms)", p->name, waited);
         probe_log(line);
-        return 0;
     }
-    probe_log("GATE ok");
 
     conn_reset(&c, 0);
     last_level[0] = 0;

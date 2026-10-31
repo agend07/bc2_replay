@@ -17,6 +17,15 @@ a local replay server. This is a technical preview, not a video player.
   `.fbgd`, `.fbgk`, `.fbgdd`, `.fbgdk`, `.fbidd`, `.fbidk`, `.fbcdd`, `.fbcdk`, `.txt`.
   Do not rename individual companions or select just one of them.
 
+### Steam version of the game (experimental)
+
+The panel supports the EA (non-Steam) `BFBC2Game.exe` (SHA-256 `3911fcc8...`) only. The proxy `dinput8.dll` can also
+**record** on the Steam `BFBC2Game.exe` (SHA-256 `22e96001...`): install it by hand in the Steam game folder (rename
+Project Rome's `dinput8.dll` to `dinput8_rome.dll`, copy `proxy\dinput8.dll` from the ZIP beside it) and play online; the
+capture appears in `%LOCALAPPDATA%\BC2Replay\captures\` and its log in `logs\recorder_<pid>.log` (`profile steam`). The
+builder turns a Steam capture into a normal recording, but **watching it needs the EA client** in the panel. Steam
+recording is not yet confirmed by a live test; please report the log if it fails.
+
 Game/server files, Project Rome and recordings are not bundled in the release
 ZIP. Unsupported executable versions are rejected; this preview does not support
 arbitrary game/server builds.
@@ -109,7 +118,7 @@ Before deciding whether to run the application:
 1. Confirm it came from this project's GitHub Release or Actions build.
 2. Compare the ZIP hash with the `.zip.sha256` file published next to the ZIP
    on the Release, for example:
-   `Get-FileHash .\bc2-local-replay-0.1.0-preview.3.zip -Algorithm SHA256`.
+   `Get-FileHash .\bc2-local-replay-0.1.0-preview.4.zip -Algorithm SHA256`.
    `SHA256.txt` inside the ZIP lists every extracted file; run `Get-FileHash`
    on any file and compare by hand.
    Matching hashes check file integrity, not publisher identity or absence of malware.

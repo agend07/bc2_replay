@@ -83,6 +83,22 @@ int main(void)
     CloseHandle(f);
     CHECK(sha256_file(abc_path, hash) && memcmp(hash, ABC_SHA, 32) == 0, "sha256_file(\"abc\") = ba7816bf...");
 
+    /* r302 profiles */
+    {
+        const bc2_rec_profile *r = bc2_rec_profile_by_name("retail"), *s = bc2_rec_profile_by_name("steam");
+        CHECK(r && s && !bc2_rec_profile_by_name("x") && r->sha256[0] == 0x39 && s->sha256[0] == 0x22 && s->sha256[31] == 0x49,
+              "profiles: retail + steam by name, SHA-256 first/last bytes");
+        CHECK(r && s && !r->deferred && s->deferred && s->timestamp == 0x4E55462Fu && s->size_of_image == 0x01970000u,
+              "profiles: steam deferred, PE stamp 4E55462F / image 01970000");
+        CHECK(r && site_va(r, S_CONNECT) == 0x0065642Fu && site_va(r, S_CAVE) == 0x00C299A7u && site_va(r, S_GETTER) == 0x007FF060u,
+              "profiles: retail site table unchanged");
+        CHECK(s && site_va(s, S_CONNECT) == 0x0065DFBFu && site_va(s, S_DESTROY) == 0x0064517Bu && site_va(s, S_CAVE) == 0x009AD387u
+                  && site_va(s, S_DISPATCHER) == 0x009715D9u && site_va(s, S_ALT_CONNECT) == 0x0065DFD6u,
+              "profiles: steam sites (r301)");
+        why[0] = 0;
+        CHECK(s && bc2_client_probe_wait_sites(s, 50, why) == -1 && why[0], "wait_sites times out in a non-game process");
+    }
+
     /* identity gate in a non-game process */
     why[0] = 0;
     ok = bc2_client_probe_gate(why);

@@ -93,7 +93,7 @@ folder normally does not. Close the game and the server first. The panel and the
 `out_shared\dinput8.dll` (`proxy\dinput8.dll` in the zip).
 
 The build embeds the release version (`version.h`, `BC2_VERSION_STRING`). It shows in the panel's proxy status
-(`build 0.1.0-preview.3`) and as the first line of each `*_<pid>.log` under `%LOCALAPPDATA%\BC2Replay\logs\`. The
+(`build 0.1.0-preview.4`) and as the first line of each `*_<pid>.log` under `%LOCALAPPDATA%\BC2Replay\logs\`. The
 panel's checks fail on a version mismatch between the installed proxy and the panel; **Prepare** from the extracted
 zip upgrades it.
 
@@ -209,7 +209,7 @@ the monitor thread (not a game thread) and matches only the exact asset greys + 
 the older bc2_mute) from the game folder before using this build, or both DLLs swap the same vtables; copy its `muted_players.txt` to `%LOCALAPPDATA%\BC2Replay\` to keep the list. The panel's **Prepare** stops (changing nothing) while `msimg32.dll` is present.
 
 Offline check: `out_shared\client_chat_selftest.exe out_shared` (command parser, mute/hash file round trips, hash
-transform, `/rec` without a recorder, smoke color parsing / mapping / object matcher / animation, `/smoke per` parser + per-instance clone callback, `/fx`; 117 checks). Game addresses come from per-exe profiles (`bc2_exe.h`: retail 3911fcc8..., Steam 22e96001...), so chat, `/smoke` and `/fx` also run on the Steam exe; the recorder and probe stay retail-only (their PE stamp + SHA-256 gate refuses any other exe), the crash dump filter uses no game address.
+transform, `/rec` without a recorder, smoke color parsing / mapping / object matcher / animation, `/smoke per` parser + per-instance clone callback, `/fx`; 117 checks). Game addresses come from per-exe profiles (`bc2_exe.h`: retail 3911fcc8..., Steam 22e96001...), so chat, `/smoke` and `/fx` also run on the Steam exe; the recorder and probe have their own two-build profile table (`client_probe.c` PROFILES; PE stamp + SHA-256 gate, any other exe is refused): on Steam the recorder installs from a thread once SteamStub has decrypted `.text`, and the capture header carries the recording exe's SHA-256 (Steam recording is not yet live-tested); the crash dump filter uses no game address.
 
 To remove the proxy, use **Clean up…** in the panel (Rome's `dinput8.dll` is restored).
 

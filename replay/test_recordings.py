@@ -636,12 +636,33 @@ class RoundRowTests(unittest.TestCase):
         mt = {'a': now - 600, 'b': now - 30, 'c': now - 900, 'd': None, 'e': now - 61}
         raws = [dict(RAW, path=p, name=p) for p in 'abcde']
         bad = dict(RAW, path='f', reason='bad .bc2raw: bad magic')
-        pick = recordings.raws_to_extract(raws + [bad, CAPTURES[0]], now, mtime=mt.get)
+        unknown = lambda p: None  # writer state unknown -> the RAW_SETTLE_S mtime rule
+        pick = recordings.raws_to_extract(raws + [bad, CAPTURES[0]], now, mtime=mt.get, closed=unknown)
         self.assertEqual([i['path'] for i in pick], ['c', 'a', 'e'])  # oldest first; b recent, d unknown, f bad
-        self.assertEqual([i['path'] for i in recordings.raws_to_extract(raws, now, tried={'c'}, mtime=mt.get)],
-                         ['a', 'e'])
+        self.assertEqual([i['path'] for i in recordings.raws_to_extract(raws, now, tried={'c'}, mtime=mt.get,
+                                                                         closed=unknown)], ['a', 'e'])
         self.assertEqual(recordings.raws_to_extract([], now), [])
         self.assertEqual(recordings.raws_to_extract([dict(RAW, path='Z:/no/such.bc2raw')], now), [])  # no mtime
+        # writer state known: closed -> at once (b, 30 s old), open -> never (a, 600 s old)
+        state = {'a': False, 'b': True, 'c': None, 'e': True}
+        pick = recordings.raws_to_extract(raws, now, mtime=mt.get, closed=state.get)
+        self.assertEqual([i['path'] for i in pick], ['c', 'e', 'b'])
+
+    @unittest.skipUnless(os.name == 'nt', 'Windows share modes')
+    def test_writer_closed(self):
+        import ctypes
+        from ctypes import wintypes
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, 'x.bc2raw')
+            self.assertIsNone(recordings.writer_closed(p))  # missing file
+            k32 = ctypes.WinDLL('kernel32', use_last_error=True)
+            k32.CreateFileW.restype = wintypes.HANDLE
+            k32.CreateFileW.argtypes = (wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID,
+                                        wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE)
+            h = k32.CreateFileW(p, 0x40000000, 0x1, None, 1, 0x80, None)  # like bc2_capture_open: WRITE, share READ
+            self.assertFalse(recordings.writer_closed(p))
+            k32.CloseHandle(wintypes.HANDLE(h))
+            self.assertTrue(recordings.writer_closed(p))
 
 
 class UiImportTests(unittest.TestCase):

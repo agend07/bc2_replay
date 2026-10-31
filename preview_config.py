@@ -12,7 +12,7 @@ def get_app_root():
 APP_ROOT = get_app_root()
 # r266: one release version shared with rome_proxy\version.h (BC2_VERSION_STRING) and the builder's
 # builder.json "version"; shown in the window title, `preview.py --version`, check-setup and the release zip name.
-VERSION = '0.1.0-preview.3'
+VERSION = '0.1.0-preview.4'
 CONFIG = APP_ROOT / 'preview.json'
 SERVER_NAME = 'Frost.Game.Main_Win32_Final.PlaybackOnlineTrace.exe'
 TIMELINE_NAME = 'Frost.Game.Main_Win32_Final.ReplayTimeline.exe'
