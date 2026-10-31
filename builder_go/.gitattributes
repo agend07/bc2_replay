@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.gz binary
+*.exe binary
+testdata/** -text

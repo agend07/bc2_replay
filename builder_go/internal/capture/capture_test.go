@@ -1,0 +1,254 @@
+package capture
+
+import (
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"runtime"
+	"slices"
+	"strings"
+	"testing"
+
+	"bc2replay/builder/internal/pyc"
+)
+
+// Vectors: testdata/capture, written by gen/gen_capture_vectors.py with the Python builder modules (synthetic).
+var vec = filepath.Join("..", "..", "testdata", "capture")
+
+// TestSyntheticStages: parse / decode (v3_types.load) / to_v1_rows of the synthetic m-log equal the Python stages
+// line for line (every decode branch: orphans, torn time, seq overwrite, bookmarks, transparent S/T/E/Q/O, M n=0).
+func TestSyntheticStages(t *testing.T) {
+	res, _, d, err := CheckDump(GoldenDump{"synthetic", vec, filepath.Join(vec, "m-log.bin")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(res) != 3 {
+		t.Fatalf("stages %d, want 3", len(res))
+	}
+	for _, c := range res {
+		if c.Diff != "" || c.Lines == 0 {
+			t.Errorf("%s: %d lines, %s", c.Stage, c.Lines, c.Diff)
+		}
+	}
+	if d.Orphans == 0 || d.BOrphans == 0 || len(d.Multi) == 0 || len(d.Sessions) == 0 || len(d.RawSeqs) == 0 {
+		t.Errorf("synthetic log lost a branch: %+v", d)
+	}
+}
+
+func TestErrors(t *testing.T) {
+	b, err := os.ReadFile(filepath.Join(vec, "errors.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cases []struct {
+		Name, Hex string
+		Error     *string
+	}
+	if err := json.Unmarshal(b, &cases); err != nil {
+		t.Fatal(err)
+	}
+	for _, c := range cases {
+		raw, _ := hex.DecodeString(c.Hex)
+		recs, err := ParseLog(raw)
+		if err == nil {
+			_, err = Decode(recs)
+		}
+		got := "<nil>"
+		if err != nil {
+			got = err.Error()
+		}
+		want := "<nil>"
+		if c.Error != nil {
+			want = *c.Error
+		}
+		if got != want {
+			t.Errorf("%s: got %q want %q", c.Name, got, want)
+		}
+	}
+}
+
+func TestWireLog(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join(vec, "m-log.bin"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	d, err := Load(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	l := WireLog(d)
+	if len(l.Packets) != len(d.Packets) || len(l.Ghosts) != len(d.Ghosts) || len(l.Multi) != len(d.Multi) || len(l.Configs) != len(d.Configs) {
+		t.Fatal("WireLog sizes differ")
+	}
+	for i, g := range d.Ghosts {
+		w := l.Ghosts[i]
+		if w.T != g.T || w.Pseq != int64(g.Pseq) || w.ID != int64(g.ID) || w.Cursor != int64(g.Cursor) || w.Cache != g.Cache ||
+			w.CreateCur != int64(g.CreateCur) || w.Config != g.Config || w.OriginBits != g.OriginBits {
+			t.Fatalf("ghost %d differs", i)
+		}
+	}
+	for seq, p := range d.Packets {
+		if w := l.Packets[int64(seq)]; w == nil || w.Limit != int64(p.Limit) || string(w.Payload) != string(p.Payload) {
+			t.Fatalf("packet %d differs", seq)
+		}
+	}
+	if !slices.Equal(l.Multi[0].Sections, d.Multi[0].Sections) || l.Configs[0].Tables[0][1] != int64(d.Configs[0].Tables[0][1]) {
+		t.Fatal("multi / config differ")
+	}
+}
+
+type bc2rawVec struct {
+	Header        map[string]any
+	LevelOf       string                        `json:"level_of"`
+	LevelOfNoname string                        `json:"level_of_noname"`
+	ExtractLevel  string                        `json:"extract_level"`
+	HeaderErrors  []struct{ Hex, Error string } `json:"header_errors"`
+}
+
+func loadBc2rawVec(t *testing.T) bc2rawVec {
+	b, err := os.ReadFile(filepath.Join(vec, "bc2raw.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var v bc2rawVec
+	if err := json.Unmarshal(b, &v); err != nil {
+		t.Fatal(err)
+	}
+	return v
+}
+
+func TestHeader(t *testing.T) {
+	v := loadBc2rawVec(t)
+	raw, err := os.ReadFile(filepath.Join(vec, "synth.bc2raw"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, err := ParseHeader(raw[:HeaderSize])
+	if err != nil {
+		t.Fatal(err)
+	}
+	num := func(k string) uint64 { return uint64(v.Header[k].(float64)) }
+	if h.Magic != v.Header["magic"] || uint64(h.Format) != num("format") || uint64(h.Flags) != num("flags") ||
+		h.ExeSHA256 != v.Header["exe_sha256"] || uint64(h.DLLVersion) != num("dll_version") ||
+		h.SessionGUID != v.Header["session_guid"] || uint64(h.RingSize) != num("ring_size") {
+		t.Errorf("header %+v vs %v", h, v.Header)
+	}
+	// filetime / interrupt_time exceed float64 precision in the JSON: compare the raw fields
+	if h.Filetime != binary.LittleEndian.Uint64(raw[64:]) || h.InterruptTime != 0x12_3456_7890 || h.Recorded == "" {
+		t.Errorf("header times %+v", h)
+	}
+	for _, c := range v.HeaderErrors {
+		b, _ := hex.DecodeString(c.Hex)
+		if _, err := ParseHeader(b); err == nil || err.Error() != c.Error {
+			t.Errorf("header error: got %v want %q", err, c.Error)
+		}
+	}
+	if got := LevelOf(filepath.Join(vec, "synth.bc2raw")); got != v.LevelOf {
+		t.Errorf("level_of %q want %q", got, v.LevelOf)
+	}
+	if got := LevelOf(filepath.Join(vec, "noname.bc2raw")); got != v.LevelOfNoname {
+		t.Errorf("level_of noname %q want %q", got, v.LevelOfNoname)
+	}
+	if got := LevelOf(filepath.Join(vec, "absent.bc2raw")); got != "" {
+		t.Errorf("level_of absent %q", got)
+	}
+}
+
+func TestFiletime(t *testing.T) {
+	for _, ft := range []uint64{0, filetimeEpoch - 1, filetimeEpoch + maxLocalUnix*10_000_000, 1<<64 - 1} {
+		if s := FiletimeISO(ft); s != "" {
+			t.Errorf("FiletimeISO(%d) = %q, want None", ft, s)
+		}
+	}
+	if s := FiletimeISO(filetimeEpoch + (maxLocalUnix-1)*10_000_000 + 9_999_999); s == "" {
+		t.Error("last valid FILETIME rejected")
+	}
+}
+
+func TestFrames(t *testing.T) {
+	rec := func(typ, n int) []byte {
+		b := make([]byte, n)
+		binary.LittleEndian.PutUint32(b, uint32(typ|n<<8))
+		return b
+	}
+	cat := func(p ...[]byte) []byte { return slices.Concat(p...) }
+	for _, c := range []struct {
+		data  []byte
+		n     int
+		trunc bool
+	}{
+		{nil, 0, false},
+		{cat(rec(TP, 8), rec(TPad, 12), rec(TS, 4)), 2, false},
+		{cat(rec(TP, 8), []byte{1, 2, 3}), 1, true},
+		{cat(rec(TP, 8), make([]byte, 8)), 1, true},  // zero head
+		{cat(rec(TP, 8), rec(TG, 6)[:4]), 1, true},   // len % 4
+		{cat(rec(TP, 8), rec(TG, 16)[:12]), 1, true}, // short record
+	} {
+		fr, trunc := ReadFrames(c.data)
+		if len(fr) != c.n || trunc != c.trunc {
+			t.Errorf("%x: %d frames trunc %v, want %d %v", c.data, len(fr), trunc, c.n, c.trunc)
+		}
+	}
+}
+
+// TestExtract: bc2raw.extract of the synthetic .bc2raw (PAD, unknown type, truncated tail, non-ASCII level and label)
+// byte for byte, with the reference's path / local time placeholders filled in; CRLF on Windows like Python's
+// write_text.
+func TestExtract(t *testing.T) {
+	v := loadBc2rawVec(t)
+	out := filepath.Join(t.TempDir(), "cap_x")
+	src := filepath.Join(vec, "synth.bc2raw")
+	m, err := Extract(src, out, "", "labél")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Extract(src, out, "", ""); err == nil || err.Error() != out+" exists; refusing to overwrite" {
+		t.Errorf("existing dir: %v", err)
+	}
+	raw, _ := os.ReadFile(src)
+	h, _ := ParseHeader(raw)
+	str := func(s string) string { j, _ := pyc.Dumps(s, pyc.DumpOptions{EnsureASCII: true}); return j }
+	fill := map[string]string{`"@LOG@"`: str(filepath.Join(out, "m-log.bin")), `"@REC@"`: str(h.Recorded)}
+	for _, f := range []string{"m-log.bin", "raw-log.bin", "m-summary.json", "capture.json"} {
+		want, err := os.ReadFile(filepath.Join(vec, "extract", f))
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, err := os.ReadFile(filepath.Join(out, f))
+		if err != nil {
+			t.Fatal(err)
+		}
+		w := string(want)
+		if strings.HasSuffix(f, ".json") {
+			for k, x := range fill {
+				w = strings.ReplaceAll(w, k, x)
+			}
+			if runtime.GOOS == "windows" {
+				w = strings.ReplaceAll(w, "\n", "\r\n")
+			}
+		}
+		if string(got) != w {
+			t.Errorf("%s differs:\n got %q\nwant %q", f, got, w)
+		}
+	}
+	if lvl, _ := m.Get("level"); lvl != "Levels/MP_TEST" {
+		t.Errorf("manifest level %v", lvl)
+	}
+	m2, err := Extract(filepath.Join(vec, "noname.bc2raw"), filepath.Join(t.TempDir(), "y"), "Levels/MP_GIVEN", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if lvl, _ := m2.Get("level"); lvl != v.ExtractLevel {
+		t.Errorf("--level: %v want %q", lvl, v.ExtractLevel)
+	}
+}
+
+func TestPyBytesRepr(t *testing.T) {
+	for in, want := range map[string]string{"": "b''", "'": `b"'"`, `'"`: `b'\'"'`, "a\t\n\r\\\x7f\x80 ~": `b'a\t\n\r\\\x7f\x80 ~'`} {
+		if got := pyBytesRepr([]byte(in)); got != want {
+			t.Errorf("repr(%q) = %s want %s", in, got, want)
+		}
+	}
+}

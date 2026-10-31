@@ -69,3 +69,6 @@ build/
 
 # Earlier research notes are not part of the runnable replay release
 /offline-replay/
+
+# Local edit backups (agents)
+*.bak_*

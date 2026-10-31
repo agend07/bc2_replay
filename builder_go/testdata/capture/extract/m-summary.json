@@ -1,0 +1,30 @@
+{
+  "drops": 1,
+  "contention": 2,
+  "skip": 3,
+  "seq": 4,
+  "records": 29,
+  "bytes": 1568,
+  "raw_records": 12,
+  "counts": {
+    "G": 15,
+    "P": 5,
+    "C": 2,
+    "B": 3,
+    "S": 4,
+    "T": 2,
+    "Q": 3,
+    "O": 1,
+    "M": 4,
+    "66": 1,
+    "E": 1
+  },
+  "truncated": true,
+  "levels": [
+    "Levels/MP_SECOND",
+    "Levels/MP_TEST",
+    "Lev\ufffdls"
+  ],
+  "reason": "bc2raw",
+  "log": "@LOG@"
+}

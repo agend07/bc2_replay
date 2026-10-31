@@ -1,0 +1,86 @@
+{
+ "created": "2026-10-31T03:06:20+00:00",
+ "files": {
+  "baselines/baselines.json": {
+   "sha256": "511ecab53c27c078df73eee460aaa24ed19239c79456488ffe6256e812a666eb",
+   "size": 751
+  },
+  "baselines/cl04_1019.json": {
+   "sha256": "f4bd6bf00dbd5bf84695876e53e6f6861c1d5867a1a21d778090b2ceded2a720",
+   "size": 142
+  },
+  "baselines/cl04_1081.json": {
+   "sha256": "192dbbb0772d2102e651d2a458ecddbff8d3f2aa5e1731360d14061c4bc95715",
+   "size": 560
+  },
+  "baselines/cl04_1084.json": {
+   "sha256": "9cc99c43cf3b0dbcc71f840256e4eaf59e90447b375d178a764608b68e739498",
+   "size": 201
+  },
+  "baselines/cl04_1088.json": {
+   "sha256": "f6a702b9ee02b839509abfd792cffbd11c932b38e56da5f30af4c71b3b9e2c6f",
+   "size": 17776
+  },
+  "baselines/patched_20261026_024027_466.json": {
+   "sha256": "020ffa1c44a750685680a60c02a5a08833607d1b30aacfcdbff651ffd9746d24",
+   "size": 142
+  },
+  "baselines/patched_20261026_024027_469.json": {
+   "sha256": "020ffa1c44a750685680a60c02a5a08833607d1b30aacfcdbff651ffd9746d24",
+   "size": 142
+  },
+  "gate_whitelist.json.zlib": {
+   "sha256": "ea2e80205d91cb93f910bf5538d461157325cc50ae2a2d45d0bd0ca3af9b0455",
+   "size": 110848
+  },
+  "mappack.json": {
+   "sha256": "0d0026ffa8c3bbb78c67e723246b6df25c8cbe5a78a568dfcfd63815c19c66ca",
+   "size": 637139
+  },
+  "reference_hashes.json": {
+   "sha256": "fe02505ee1a483101e1c2b9424f3f23f99c42eb0d38518722b09935f38d8bec1",
+   "size": 2953
+  },
+  "templates_pack.json": {
+   "sha256": "d52883aee6209db287edb43cfe5b0e44ffac6f77334b8f4476ffa3449f1e94f4",
+   "size": 485286
+  }
+ },
+ "format": 3,
+ "sources": {
+  "baselines": [
+   "cl04_1019",
+   "cl04_1081",
+   "cl04_1084",
+   "cl04_1088",
+   "patched_20261026_024027_469",
+   "patched_20261026_024027_466"
+  ],
+  "corpus_demos": 72,
+  "corpus_sha": "4a4bb9d160f338fc5308931b2a40eaaf4ca8b2796e9fcf18199df84c69c0539c",
+  "extra_sets": [
+   "patched_20261023_165152_405"
+  ],
+  "exts": [
+   "fbgd",
+   "fbgk",
+   "fbgdd",
+   "fbgdk",
+   "fbidd",
+   "fbidk",
+   "fbcdd",
+   "fbcdk",
+   "txt"
+  ],
+  "index": "old_demos/companions_index.json",
+  "map_sets": 42,
+  "references": [
+   "cl04_1019",
+   "cl04_1081",
+   "cl04_1084",
+   "cl04_1088"
+  ],
+  "templates": "templates_pack_r296.json",
+  "whitelist": "wl_r298.json"
+ }
+}

@@ -1,0 +1,82 @@
+[
+ {
+  "name": "corrupt_head",
+  "hex": "010300000000000000000000",
+  "error": "corrupt log at 0"
+ },
+ {
+  "name": "corrupt_past_end",
+  "hex": "0124000000000000000000000000000000000000000000000000000000000000",
+  "error": "corrupt log at 0"
+ },
+ {
+  "name": "short_p",
+  "hex": "0120000000000000000000000000000000000000000000000000000000000000",
+  "error": "unpack_from requires a buffer of at least 32 bytes for unpacking 32 bytes at offset 0 (actual buffer size is 28)"
+ },
+ {
+  "name": "short_g",
+  "hex": "023c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "error": "unpack_from requires a buffer of at least 60 bytes for unpacking 60 bytes at offset 0 (actual buffer size is 56)"
+ },
+ {
+  "name": "short_c",
+  "hex": "0308000000000000",
+  "error": "unpack_from requires a buffer of at least 8 bytes for unpacking 8 bytes at offset 0 (actual buffer size is 4)"
+ },
+ {
+  "name": "short_c_tables",
+  "hex": "03340000030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "error": "unpack_from requires a buffer of at least 52 bytes for unpacking 12 bytes at offset 40 (actual buffer size is 48)"
+ },
+ {
+  "name": "short_c_t1",
+  "hex": "033000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "error": "unpack_from requires a buffer of at least 48 bytes for unpacking 8 bytes at offset 40 (actual buffer size is 44)"
+ },
+ {
+  "name": "short_c_child",
+  "hex": "03280000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "error": "unpack_from requires a buffer of at least 40 bytes for unpacking 0 bytes at offset 40 (actual buffer size is 36)"
+ },
+ {
+  "name": "short_m",
+  "hex": "012400000000000001000000000000000100000001100000000000000000000000000000032c00000000000000000000000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f0240000001000000100000000100000001000000010000001111000000000000640000007800000078000080100000000000803f00000000000080bf0000000004100000030000000000000000000000",
+  "error": "unpack_from requires a buffer of at least 16 bytes for unpacking 12 bytes at offset 4 (actual buffer size is 12)"
+ },
+ {
+  "name": "short_b",
+  "hex": "0520000000000000000000000000000000000000000000000000000000000000",
+  "error": "unpack_from requires a buffer of at least 32 bytes for unpacking 32 bytes at offset 0 (actual buffer size is 28)"
+ },
+ {
+  "name": "short_b_list",
+  "hex": "05340000000000000000000000000000000000000000000000000000020000000100000000000000000000000000000000000000",
+  "error": "unpack_from requires a buffer of at least 56 bytes for unpacking 24 bytes at offset 32 (actual buffer size is 48)"
+ },
+ {
+  "name": "short_s",
+  "hex": "06340000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "error": "unpack_from requires a buffer of at least 52 bytes for unpacking 52 bytes at offset 0 (actual buffer size is 48)"
+ },
+ {
+  "name": "short_t",
+  "hex": "07280000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "error": "unpack_from requires a buffer of at least 40 bytes for unpacking 40 bytes at offset 0 (actual buffer size is 36)"
+ },
+ {
+  "name": "short_e",
+  "hex": "0814000000000000000000000000000000000000",
+  "error": "unpack_from requires a buffer of at least 20 bytes for unpacking 20 bytes at offset 0 (actual buffer size is 16)"
+ },
+ {
+  "name": "short_q",
+  "hex": "0920000000000000000000000000000000000000000000000000000000000000",
+  "error": "unpack_from requires a buffer of at least 32 bytes for unpacking 32 bytes at offset 0 (actual buffer size is 28)"
+ },
+ {
+  "name": "trailing_bytes_ok",
+  "hex": "012800000000000001000000000000000100000001100000100000006162000002000000616200000102",
+  "error": null
+ }
+]

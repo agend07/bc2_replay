@@ -1,0 +1,11 @@
+{
+ "version": 1,
+ "level": "Levels/MP_TEST",
+ "label": "labél",
+ "paired": false,
+ "recorded": "@REC@",
+ "source": {
+  "file": "synth.bc2raw",
+  "session_guid": "a3a2a1a0-a5a4-a7a6-a8a9-aaabacadaeaf"
+ }
+}

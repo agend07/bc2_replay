@@ -1,0 +1,4 @@
+# r278: the builder source and its data pack must be byte-stable on every checkout (the release zip and the
+# data pack manifest carry their sha256): no CRLF conversion.
+builder_src/*.py text eol=lf
+datapack/** -text
