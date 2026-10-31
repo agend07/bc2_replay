@@ -38,7 +38,7 @@ var (
 	// WheelCfg is WHEEL_CFG: (section count, section index) -> wheel blob cfg (default 0).
 	WheelCfg = map[[2]int]int{{29, 5}: 1, {29, 6}: 1, {40, 6}: 1, {40, 7}: 1, {54, 6}: 1, {54, 7}: 1, {35, 12}: 1, {35, 13}: 1}
 	// Layouts are the verified section counts (LAYOUTS).
-	// r295: + /5, /61, /80 (Laguna Presa MP_007 cap 52296 round 2: jet-ski-like /5 v634, tracked /61 v309 and /80 v334 with 14/16 VTTWheel sections).
+	// r295: + /5, /61, /80 (White Pass MP_007 cap 52296 round 2: jet-ski-like /5 v634, tracked /61 v309 and /80 v334 with 14/16 VTTWheel sections).
 	Layouts = map[int]bool{29: true, 37: true, 10: true, 15: true, 40: true, 14: true, 4: true, 7: true, 8: true, 35: true, 54: true, 68: true, 76: true, 13: true, 45: true, 47: true, 5: true, 61: true, 80: true}
 	// physShape is PHYS_SHAPE: layout -> s1.p2 shape (absent = StdShape).
 	physShape = map[int]PhysShape{14: {false, 0}, 4: {false, 0}, 7: {false, 0}, 8: {false, 0}, 13: {false, 0}, 68: {true, 4}, 76: {true, 4},

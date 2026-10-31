@@ -26,6 +26,9 @@ capture appears in `%LOCALAPPDATA%\BC2Replay\captures\` and its log in `logs\rec
 builder turns a Steam capture into a normal recording, but **watching it needs the EA client** in the panel. Steam
 recording is not yet confirmed by a live test; please report the log if it fails.
 
+Project Rome's `dinput8.dll` is required on Steam too: the proxy loads it as `dinput8_rome.dll` and refuses to load
+without it, so the game does not start if `proxy\dinput8.dll` is copied without Rome's DLL renamed beside it.
+
 Game/server files, Project Rome and recordings are not bundled in the release
 ZIP. Unsupported executable versions are rejected; this preview does not support
 arbitrary game/server builds.
@@ -86,16 +89,14 @@ Testing a release end to end? Follow [docs/tester_checklist.md](docs/tester_chec
    ZIP, and do not put it in the game installation folder.
 3. Keep **everything from the ZIP** together:
    - `BC2LocalReplay.exe`
-   - `_internal/` — required libraries/data in the default folder (`onedir`) build;
-     do not delete it or move the EXE away from it.
+   - `_internal/` — required libraries/data; do not delete it or move the EXE
+     away from it.
    - `proxy/` — the client `dinput8.dll` proxy (`proxy\dinput8.dll`) that the
      panel installs for you.
    - `builder/` and `datapack/` — the recording builder (`builder.exe`) and its data pack, used by the Recordings window.
-   - `Redirect.ps1`
-   - `USER_GUIDE.md`
+   - `USER_GUIDE.md` and `docs/tester_checklist.md`
    - `SHA256.txt` — SHA-256 of every file in the ZIP.
-   A comparison `onefile` build has no `_internal/` folder and extracts its runtime
-   temporarily instead. Neither packaging mode is digitally signed.
+   The package is not digitally signed.
 4. Open `BC2LocalReplay.exe`. Python is **not required**.
 5. Leave the controller window open while playing. Do not open another controller.
 
@@ -103,9 +104,9 @@ The EXE is unsigned, so Windows/antivirus may warn about it. If the browser or
 antivirus calls the download dangerous, do not disable protection or add an
 exception blindly: report the exact warning and file hash for investigation.
 Different packaging is not proof that a file is safe. Only run packages from a
-source you trust. Never run the entire application as administrator. Only two
-small helpers ask Windows for elevation, each with its own UAC prompt: the
-client-proxy install helper that **Prepare** starts (section 3) and `Redirect.ps1`.
+source you trust. Never run the entire application as administrator. Only one
+small helper asks Windows for elevation (UAC prompt): the client-proxy install
+helper that **Prepare** and **Clean up…** start (section 3).
 
 ### SmartScreen: "Windows protected your PC" / "Unknown publisher"
 
@@ -155,9 +156,8 @@ missing or Prepare has not run yet. Click **▸ Setup** to open it yourself.
    - "Install the dinput8.dll proxy into <server folder>". The server folder
      needs it too: without it the replay server talks to the real online
      backend instead of the local one. This normally needs no UAC prompt.
-   - "Build the playback server executables in <server folder>":
-     `Frost.Game.Main_Win32_Final.ReplayTimeline.exe` and
-     `Frost.Game.Main_Win32_Final.PlaybackOnlineTrace.exe` next to the original.
+   - "Build the playback server executable in <server folder>":
+     `Frost.Game.Main_Win32_Final.ReplayTimeline.exe` next to the original.
      Your original server EXE is not overwritten and no admin password or
      identity is copied from an existing server.
    - "Create the local preview instance under runtime\"
@@ -173,7 +173,7 @@ missing or Prepare has not run yet. Click **▸ Setup** to open it yourself.
    administrator.
 7. Wait. Progress shows in the status line under the buttons ("Prepare:
    installing client proxy… (answer the Windows permission prompt)", "Prepare:
-   building the playback server executables…", "Prepare: checking setup…"). Do
+   building the playback server executable…", "Prepare: checking setup…"). Do
    not click another start button while Prepare is working.
 8. Read the result in the status line. Prepare ends with six checks. "Setup
    check: all 6 ok." means you are done; the button then reads **Check**
@@ -219,7 +219,7 @@ writes crash minidumps (section 6) and lets local replay work without a `hosts`
 entry. Its chat commands also include `/smoke` (colours by name or `#rrggbb`,
 animations, `/smoke halloween`, presets pumpkin/ghost/blood), `/fx` (recolour
 other effects: muzzle flashes, tracers, impacts, fire), `/hash` and
-`/help`; see [rome_proxy/README.md section 5](rome_proxy/README.md#5-in-game-chat-commands-r255-shared-build).
+`/help`; see [rome_proxy/README.md section 5](https://github.com/agend07/bc2_replay/blob/main/rome_proxy/README.md#5-in-game-chat-commands-r255-shared-build).
 
 You normally do this once per extracted application folder. Configuration is
 saved as `preview.json` beside the EXE.
@@ -228,9 +228,10 @@ saved as `preview.json` beside the EXE.
 
 **Clean up…** removes what Prepare created: the proxy in the game folder
 (Project Rome's `dinput8.dll` is restored; administrator prompt), the proxy in
-the server folder, the built playback executables
-`Frost.Game.Main_Win32_Final.ReplayTimeline.exe` and
-`Frost.Game.Main_Win32_Final.PlaybackOnlineTrace.exe`, and
+the server folder, the built playback executable
+`Frost.Game.Main_Win32_Final.ReplayTimeline.exe` (and
+`Frost.Game.Main_Win32_Final.PlaybackOnlineTrace.exe`, which older versions
+also wrote), and
 `runtime\Instance-local-preview`. Your game, server files and recordings stay.
 It asks for confirmation first and refuses while the game or a dedicated
 server is running, so close both first. Use it before uninstalling the game or
@@ -255,31 +256,18 @@ Click the **▶** (play) button beside the Demo menu after selecting the match.
 
 ## Why is the redirect needed?
 
-The controller no longer has Redirect buttons. With the `dinput8.dll` proxy
-(`rome_proxy/README.md`), the game started by the controller connects to your PC
-without a `hosts` entry. Without the proxy, run `Redirect.ps1` yourself
-(`-Mode on` / `-Mode off`, see section 8). The rest of this section describes
-that manual fallback.
+The Project Rome client contacts `bfbc2.emulatornexus.com` for its login and server-list services. For a replay
+it must reach the replacement services this application runs **on your own PC** instead. The installed
+`dinput8.dll` proxy does that inside the BC2 process the controller starts (the controller launches it with
+`BC2_ROME_HOST=127.0.0.1`); a BC2 you start yourself connects to online Rome as usual. Nothing system-wide
+changes and no administrator permission is needed for it.
 
-The Project Rome client normally contacts `bfbc2.emulatornexus.com` for its login
-and server-list services. This preview runs replacement services **on your own
-PC**. Without the redirect, the client would contact the normal online service,
-not this local backend, and would not discover the local replay through it.
+Earlier previews could add a block between `# === BC2-VIEWERSET-STUB-BEGIN ===` and
+`# === BC2-VIEWERSET-STUB-END ===` to `C:\Windows\System32\drivers\etc\hosts`. If it is still
+there, open that file in Notepad started as administrator, delete those three lines and save; then
+restart BC2 before logging in to online Rome.
 
-`Redirect.ps1 -Mode on` adds one marked block to the Windows `hosts` file, mapping that
-hostname to `127.0.0.1` (your PC). It changes where the client connects; it does
-not patch the game, download a server list or start the backend. The ▶ (play) button
-is still required to run the local backend and replay server.
-
-Windows administrator permission is needed only to change `hosts`. The mapping
-affects the hostname system-wide, not just this controller. While it is enabled,
-use **dummy credentials only**, and do not try normal online Rome login.
-`-Mode off` removes only this application's marked block so normal name
-resolution can resume. It does not remove another tool's mapping. Restart BC2
-after either change because an already-running game may retain old connections
-or cached addresses. The helper also requests a Windows DNS-cache flush.
-
-The hosts file entry does not prove network isolation and does not validate VPN/DNS software. Do not expose the backend to other computers.
+Do not expose the local backend to other computers.
 
 ## 5. Start the replay; the game starts by itself
 
@@ -363,7 +351,7 @@ The **ⓘ Help** button in the controller shows a short version of this list.
   are not repaired.
 - Hover the mouse over a control for a short explanation.
 - **▾ Messages** above the message text at the bottom hides or shows it (kept for the next start).
-- There is no Launch client button: ▶ (play) starts BC2. **VCR label** shows the replay time over
+- ▶ (play) starts BC2. **VCR label** shows the replay time over
   the game window: green ▶ PLAY or red ⏸ PAUSE, the time, then FREE (free camera)
   or FPV (player view); a second line reads `SPACE to pause` (playing) or `SPACE to play` (paused). With **Show looked-at player** (on by default) the FREE
   label also names the player nearest the screen centre (within about 10 degrees
@@ -386,8 +374,8 @@ The **ⓘ Help** button in the controller shows a short version of this list.
     wrapping around. Starts the free camera if it is off. One step per press.
 - Free camera: use mouse + WASD in BC2; hold Shift to move faster. Left / right
   mouse button = up / down (also while the deploy screen is still up).
-- The **Player** menu fills itself from the demo's player list, and from the
-  game once you have joined.
+- The **Player** menu fills itself from the game once you have joined (older
+  recordings that carry a player list fill it right away).
 - Choose a player, then **Focus** for a one-shot camera move (it starts the free
   camera if needed), or **Follow (experimental)** to track them; it can look jittery.
 - While following, the same button reads **Stop follow**: it leaves the free camera
@@ -450,7 +438,7 @@ the game or the server; the list refreshes every 5 s while it is open and idle.
 
 **Supported maps.** Builds use the data pack. Maps with a reference baseline
 today: MP_006CQ (Arica Harbor), MP_005 (Atacama Desert), MP_SP_005CQ (Heavy
-Metal). MP_007 (Laguna Presa) and MP_003 (Laguna Alta) have a server-demo
+Metal). MP_007 (White Pass) and MP_003 (Laguna Alta) have a server-demo
 baseline only (first builds, untested in game). Other maps in the map pack
 build but may fail the gate until their templates are added.
 
@@ -467,20 +455,13 @@ build but may fail the gate until their templates are added.
 2. If the controller was force-ended without its normal close (for example from
    Task Manager), the next controller you open stops the BC2 and replay server
    the old one started (only those exact processes) when it opens.
-3. If you turned the hosts redirect on by hand, turn it off from PowerShell in
-   the extracted application folder (approve UAC). Restart BC2 before
-   attempting normal online Rome login.
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Redirect.ps1 -Mode off
-```
-
-Do not delete/move `Redirect.ps1` until online mode has been restored.
+3. Online play needs nothing else: the replay redirect exists only inside the BC2 the
+   controller starts (see "Why is the redirect needed?").
 
 ## Privacy and limits
 
 - Do not share generated `preview.json` or `runtime/`: they contain local paths,
-  session state, private logs, generated admin credentials and hosts backups.
+  session state, private logs and generated admin credentials.
 - Do not expose the local backend to the internet.
 - Startup and playback from a freshly extracted folder were user-confirmed on
   the development PC. A different-PC installation and disconnected-network test

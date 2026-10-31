@@ -88,7 +88,7 @@ jobs:
         run: python -m pip install -r requirements-build.txt
       - name: Check source imports and names
         working-directory: .
-        run: python -m pyflakes preview.py preview_config.py server_build.py launcher_panel.py replay backend
+        run: python -m pyflakes preview.py preview_config.py server_build.py launcher_panel.py backend_lifecycle.py instance_defaults.py release_pack.py replay backend
       - name: Compile sources
         working-directory: .
         run: python -m compileall -q .

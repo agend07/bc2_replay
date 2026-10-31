@@ -50,12 +50,10 @@ how the panel's client launch logs in and joins the local server automatically
 (`replay/web_launch.py`). After **▶** (play), the panel launches the game
 by itself once the server is ready.
 
-The panel no longer has Redirect buttons. The system-wide `hosts` redirect is a
-manual fallback: `Redirect.ps1 -Mode on|off`, which needs UAC. It sends the
-Rome login/server-list hostname to the local backend system-wide; turn it off
-before returning to online Rome. Use dummy credentials only, and restart BC2
-after changing modes. See
-[the user guide](USER_GUIDE.md#why-is-the-redirect-needed).
+No `hosts` entry is needed or used. Earlier previews could add a block between `# === BC2-VIEWERSET-STUB-BEGIN ===` and
+`# === BC2-VIEWERSET-STUB-END ===` to `C:\Windows\System32\drivers\etc\hosts`. If it is still
+there, open that file in Notepad started as administrator, delete those three lines and save; then
+restart BC2 before logging in to online Rome.
 
 ## Source layout
 
@@ -67,15 +65,16 @@ after changing modes. See
 - `backend/`: local backend and sanitized protocol fixtures.
 - `backend_lifecycle.py`: conservative cleanup of orphan backends from the same installation.
 - `instance_defaults.py`: nonpersonal gameplay defaults for the local server instance.
-- `release_pack.py`: assembles and checks the release ZIP from locally built parts.
+- `release_pack.py`: assembles and checks the full release ZIP (run by CI for the tag; locally for checking).
 - `rome_proxy/`: required `dinput8.dll` proxy, installed by **Prepare**: recorder,
   in-game chat commands, crash minidumps, host redirect (no `hosts` entry); see its README.
 - `builder_go/`: the Go recording builder (`builder.exe`, standard library, offline build).
 - `datapack/`: the builder's data pack (templates, baselines, gate whitelist).
 - `docs/`: tester checklist.
 
-Only Timeline playback is supported. The trace executable is an intermediate
-server build, not a second controller mode. The diagnostic `python -m replay.…`
+Only Timeline playback is supported. The trace build is an intermediate image
+derived in memory while building the Timeline server; it is not written to disk
+and is not a second controller mode. The diagnostic `python -m replay.…`
 helpers (`clean_screen`, `clean_vignette`, `free_cam_fov`) are dev-only and not
 reachable from the EXE. `vcr_overlay` is the panel's live VCR label; only its
 `__main__` diagnostic is dev-only. Legacy hook migration
@@ -95,14 +94,13 @@ python -m pip install -r requirements-build.txt
 Default: `onedir`, with UPX disabled. Outputs:
 `dist/onedir/bc2-local-replay-standalone.zip` and `dist/onedir/SHA256.txt`.
 This is the panel-only build: the ZIP contains the EXE, `_internal/` runtime
-directory, redirect helper and guide, but not the proxy, builder or data pack.
+directory and guide, but not the proxy, builder or data pack.
 The full release ZIP is assembled by `release_pack.py` (see **Release
 (maintainer)** below).
 Keep the entire extracted folder together. Fixtures are included in the runtime.
 
-For a comparison build, run `./build.ps1 -BundleMode onefile`; its outputs are
-under `dist/onefile/`. Both modes remain unsigned. Onedir avoids self-extraction,
-but changing packaging does not establish safety or guarantee browser acceptance.
+Maintainer note: `./build.ps1 -BundleMode onefile` makes an unsigned comparison
+build under `dist/onefile/`; releases ship only `onedir`.
 Runtime requires Windows; Python is only needed to build or run from source.
 No game files, secrets, local configuration or signing certificate are needed to build.
 The generated EXE is unsigned; antivirus/SmartScreen warnings are possible.
@@ -135,8 +133,9 @@ To test a release zip on a clean Windows account, follow
 
 ## Release (maintainer)
 
-The release ZIP `bc2-local-replay-<version>.zip` is assembled locally, not in CI.
-From this folder:
+The release ZIP `bc2-local-replay-<version>.zip` is assembled by `release_pack.py`:
+by CI for the published assets (see GitHub Actions below), and locally for checking.
+To build it locally, from this folder:
 
 1. `.\build.ps1` — the panel, PyInstaller onedir, into `dist\onedir\BC2LocalReplay\`.
 2. `rome_proxy\build_shared.cmd` — the proxy, into `rome_proxy\out_shared\dinput8.dll`.
@@ -171,10 +170,10 @@ The local zip is for checking; the published assets come from CI (tag push, see 
 Actions below). Binaries are never committed.
 
 **Version rule.** One version string is shared by the panel, the `dinput8.dll`
-proxy and the builder, and `test_version_sync.py` checks that they agree. Bump
-all three for every release: `preview_config.VERSION`, `rome_proxy\version.h`
-and the builder (release_pack builds `builder.exe` with `-Version` =
-`preview_config.VERSION` and writes `builder\builder.json`). The panel's setup check fails when the installed proxy
+proxy and the builder. `replay\test_version_sync.py` checks that
+`preview_config.VERSION` and `rome_proxy\version.h` agree; bump both for every
+release. The builder is not edited by hand: release_pack builds `builder.exe` with
+`-Version` = `preview_config.VERSION` and writes `builder\builder.json`. The panel's setup check fails when the installed proxy
 build differs from the panel.
 
 ## GitHub Actions
@@ -184,7 +183,7 @@ build differs from the panel.
   `bc2-local-replay-windows-onefile` respectively. Each artifact contains a ZIP
   and its SHA256 checksum. Version-tag builds use `onedir`.
 - The workflow builds the proxy `dinput8.dll` (MSVC x86) and runs its selftests, the panel
-  ZIP (EXE, `_internal/`, `Redirect.ps1`, `USER_GUIDE.md`, `builder\builder.exe`), and in
+  ZIP (EXE, `_internal/`, `USER_GUIDE.md`, `builder\builder.exe`), and in
   `onedir` mode the full release ZIP with `release_pack.py` (panel + proxy + the builder of
   the same run + the committed data pack, then `--check`), uploaded as `bc2-local-replay-release`.
 - Its `builder` job runs `go vet` and `go test` on `builder_go\` (the exams that

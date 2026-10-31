@@ -8,7 +8,7 @@ import socket
 import subprocess
 import sys
 from instance_defaults import STARTUP
-from preview_config import APP_ROOT, VERSION, ORIGINAL_HASH, TRACE_HASH, TIMELINE_HASH, CLIENT_HASH, server_dir, client_exe, trace_exe, timeline_exe, runtime_dir, recording, recording_argument, level, available_recordings, missing_companions
+from preview_config import APP_ROOT, VERSION, ORIGINAL_HASH, TIMELINE_HASH, CLIENT_HASH, server_dir, client_exe, timeline_exe, runtime_dir, recording, recording_argument, level, available_recordings, missing_companions
 from preview_config import verify, raw_config
 
 
@@ -34,12 +34,10 @@ def check(require_recording=True):
     else:
         try: check_recording()
         except RuntimeError: recording_ok=False
-    built=trace_exe().is_file()
-    if built: verify(trace_exe(),TRACE_HASH)
     timeline_built=timeline_exe().is_file()
     if timeline_built: verify(timeline_exe(),TIMELINE_HASH)
     return {'supported_original_server':True,'supported_client':True,
-            'recording_companions_present':recording_ok,'playback_build_present':built,
+            'recording_companions_present':recording_ok,
             'timeline_build_present':timeline_built,
             'active_recording':recording_argument() if recording_ok else None,
             'available_recordings':available_recordings(),

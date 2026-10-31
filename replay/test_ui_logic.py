@@ -101,12 +101,12 @@ class LauncherImportTests(unittest.TestCase):
 class PrepareButtonTests(unittest.TestCase):
     """Setup section: one Prepare button + a confirmed Clean up… button (pure helpers in replay.first_run)."""
 
-    def plan(self, client='rome', server='rome', timeline=False, trace=False, instance=False):
+    def plan(self, client='rome', server='rome', timeline=False, instance=False):
         from replay import first_run as fr
         return fr.prepare_plan({'game_dir': 'GAMEDIR', 'server_dir': 'SRVDIR',
                                 'client_proxy': {'state': client, 'text': 'c'},
                                 'server_proxy': {'state': server, 'text': 's'},
-                                'timeline_exe': timeline, 'server_exe': trace, 'instance': instance})
+                                'timeline_exe': timeline, 'instance': instance})
 
     def test_button_labels(self):
         from replay.first_run import prepare_button_text
@@ -124,31 +124,32 @@ class PrepareButtonTests(unittest.TestCase):
                                '- Install the dinput8.dll proxy into GAMEDIR (Windows will ask for administrator '
                                'permission)\n'
                                '- Install the dinput8.dll proxy into SRVDIR\n'
-                               '- Build the playback server executables in SRVDIR\n'
+                               '- Build the playback server executable in SRVDIR\n'
                                '- Create the local preview instance under runtime\\\n'
                                'Nothing else is changed. Continue?')
         self.assertEqual(text.count('administrator'), 1)
 
     def test_confirm_only_needed_steps(self):
         from replay.first_run import prepare_confirm_text
-        text = prepare_confirm_text(self.plan('installed', 'rome', True, True, True), 'GAMEDIR', 'SRVDIR')
+        text = prepare_confirm_text(self.plan('installed', 'rome', True, True),'GAMEDIR', 'SRVDIR')
         self.assertEqual(text, 'Prepare will:\n- Install the dinput8.dll proxy into SRVDIR\n'
                                'Nothing else is changed. Continue?')
         self.assertNotIn('administrator', text)
         self.assertNotIn('GAMEDIR', text)
-        text = prepare_confirm_text(self.plan('upgrade', 'upgrade', True, True, True), 'GAMEDIR', 'SRVDIR')
+        text = prepare_confirm_text(self.plan('upgrade', 'upgrade', True, True),'GAMEDIR', 'SRVDIR')
         self.assertIn('- Upgrade the dinput8.dll proxy in GAMEDIR (Windows will ask for administrator permission)\n',
                       text)
         self.assertIn('- Upgrade the dinput8.dll proxy in SRVDIR\n', text)
-        self.assertIsNone(prepare_confirm_text(self.plan('installed', 'installed', True, True, True), 'G', 'S'))
+        self.assertIsNone(prepare_confirm_text(self.plan('installed', 'installed', True, True),'G', 'S'))
 
     def test_cleanup_confirm(self):
         import preview_config
         from replay.first_run import cleanup_confirm_text
         text = cleanup_confirm_text('GAMEDIR', 'SRVDIR')
         self.assertEqual(text, "Clean up removes what Prepare created: the proxy in GAMEDIR (Project Rome's dinput8.dll "
-                               'restored; administrator prompt), the proxy in SRVDIR, the built playback executables '
-                               f'{preview_config.TIMELINE_NAME} and {preview_config.SERVER_NAME} in SRVDIR, and '
+                               'restored; administrator prompt), the proxy in SRVDIR, the built playback executable '
+                               f'{preview_config.TIMELINE_NAME} (and {preview_config.LEGACY_TRACE_NAME} from older '
+                               'versions) in SRVDIR, and '
                                'runtime\\Instance-local-preview. Your game, server files and recordings stay. '
                                'Close the game and the replay server first. Continue?')
 
@@ -209,7 +210,6 @@ class SetupWithoutRecordingTests(unittest.TestCase):
              mock.patch.object(preview, 'check_recording', side_effect=RuntimeError('no demos')), \
              mock.patch.object(preview, 'server_dir', return_value=Path('C:/srv')), \
              mock.patch.object(preview, 'client_exe', return_value=Path('C:/c.exe')), \
-             mock.patch.object(preview, 'trace_exe', return_value=Path('C:/srv/none.exe')), \
              mock.patch.object(preview, 'timeline_exe', return_value=Path('C:/srv/none2.exe')), \
              mock.patch.object(preview, 'available_recordings', return_value=[]):
             result = preview.check(require_recording=False)

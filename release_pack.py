@@ -1,5 +1,5 @@
-"""r266: assemble the release zip of the panel from locally built parts (binaries are gitignored;
-the zip is uploaded by hand as a GitHub Release asset). Stdlib only.
+"""r266: assemble the release zip of the panel from built parts (binaries are gitignored; CI runs this and its
+tag workflow uploads the zip as the GitHub Release asset; a local run is for checking). Stdlib only.
 
   python release_pack.py [--builder-exe builder.exe] [--datapack DIR] [--dist dist\\onedir\\BC2LocalReplay]
                          [--proxy rome_proxy\\out_shared\\dinput8.dll] [--out dist\\release]
@@ -14,8 +14,7 @@ r278: --datapack defaults to the committed datapack\\ next to this script.
 P5 (Go port): the recording builder is the Go builder.exe. Without --builder-exe it is built from builder_go\\ with
 builder_go\\build.ps1 -Version <VERSION> (reproducible: trimpath, no VCS stamp, empty build id); --builder-exe takes a
 prebuilt one (e.g. the CI artifact). The zip ships builder\\builder.exe + builder\\builder.json (format 2: runtime
-"go", go version, version, commit, exe sha256) - no Python runtime and no builder_src (that stays in the repo as the
-readable reference). --check also verifies the exe sha against builder.json and runs 'builder.exe version --json'.
+"go", go version, version, commit, exe sha256) - no Python runtime. --check also verifies the exe sha against builder.json and runs 'builder.exe version --json'.
 """
 import argparse
 import fnmatch
@@ -40,7 +39,7 @@ EXE_NAME = 'BC2LocalReplay.exe'
 SUMS_NAME = 'SHA256.txt'
 EXE_TIMEOUT = 60
 BUILD_TIMEOUT = 900
-APP_FILES = ('Redirect.ps1', 'USER_GUIDE.md', 'docs/tester_checklist.md')
+APP_FILES = ('USER_GUIDE.md', 'docs/tester_checklist.md')
 GO_DIR = 'builder_go'                 # Go builder source; build.ps1 there makes builder.exe
 BUILDER_EXE = 'builder/builder.exe'   # in the zip
 BUILDER_JSON = 'builder/builder.json'
@@ -141,12 +140,13 @@ def builder_version(exe, run, cwd=None):
 
 
 def git_commit(app_root, run):
-    """HEAD of the repo holding app_root, + '-dirty' when builder_go has uncommitted changes; 'unknown' without git."""
+    """HEAD of the repo holding app_root, + '-dirty' when any tracked file has uncommitted changes (untracked files
+    are ignored); 'unknown' without git."""
     try:
         rc, head = run(['git', 'rev-parse', 'HEAD'], str(app_root), EXE_TIMEOUT)
         if rc != 0 or not (head or '').strip():
             return 'unknown'
-        rc2, dirty = run(['git', 'status', '--porcelain', '--', GO_DIR], str(app_root), EXE_TIMEOUT)
+        rc2, dirty = run(['git', 'status', '--porcelain', '--untracked-files=no'], str(app_root), EXE_TIMEOUT)
         return head.strip() + ('-dirty' if rc2 == 0 and (dirty or '').strip() else '')
     except Exception:
         return 'unknown'

@@ -14,7 +14,9 @@ APP_ROOT = get_app_root()
 # builder.json "version"; shown in the window title, `preview.py --version`, check-setup and the release zip name.
 VERSION = '0.1.0-preview.4'
 CONFIG = APP_ROOT / 'preview.json'
-SERVER_NAME = 'Frost.Game.Main_Win32_Final.PlaybackOnlineTrace.exe'
+# Intermediate server build written by releases up to 0.1.0-preview.4; now derived in memory only
+# (server_build.build). Nothing requires it; Clean up still deletes a leftover copy.
+LEGACY_TRACE_NAME = 'Frost.Game.Main_Win32_Final.PlaybackOnlineTrace.exe'
 TIMELINE_NAME = 'Frost.Game.Main_Win32_Final.ReplayTimeline.exe'
 ORIGINAL_HASH = 'ca8169fa03a29e02af1bf8db8770ab0e68f13a95b010c52eca23733068298347'
 TRACE_HASH = 'b95bdeaaee6994f838a433efa5ff037ce76a24c403eae488c8f8a22d764fe99e'
@@ -65,7 +67,6 @@ def save_settings(updates):
 
 def server_dir(): return Path(settings()['server_dir']).resolve()
 def client_exe(): return Path(settings()['client_exe']).resolve()
-def trace_exe(): return server_dir()/SERVER_NAME
 def timeline_exe(): return server_dir()/TIMELINE_NAME
 
 

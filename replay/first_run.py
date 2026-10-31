@@ -180,7 +180,7 @@ STEP_LABELS = {'client_proxy': 'client proxy', 'server_proxy': 'server folder pr
 PROGRESS = {
     'client_proxy': 'Prepare: installing client proxy… (answer the Windows permission prompt)',
     'server_proxy': 'Prepare: installing server folder proxy…',
-    'build': 'Prepare: building the playback server executables…',
+    'build': 'Prepare: building the playback server executable…',
     'instance': 'Prepare: creating the local preview instance…',
     'check': 'Prepare: checking setup…',
 }
@@ -246,7 +246,6 @@ def prepare_facts(cfg, app_root=None, status=None, is_file=None):
         'client_proxy': safe_status(game_dir) if game_dir else None,
         'server_proxy': safe_status(server) if server else None,
         'timeline_exe': bool(server) and is_file(Path(server) / preview_config.TIMELINE_NAME),
-        'server_exe': bool(server) and is_file(Path(server) / preview_config.SERVER_NAME),
         'instance': is_file(root.joinpath(*INSTANCE_INI)),
     }
 
@@ -279,10 +278,9 @@ def prepare_plan(facts):
             stop = stop or (f'the proxy build {st.get("source") or "dinput8.dll"} is missing or not the shared '
                             'build. Build it first: rome_proxy\\build_shared.cmd')
         steps.append({'step': step, 'needed': needed, 'reason': reason, 'folder': folder, 'state': state})
-    missing = [name for name, key in ((preview_config.TIMELINE_NAME, 'timeline_exe'),
-                                      (preview_config.SERVER_NAME, 'server_exe')) if not facts.get(key)]
+    missing = [name for name, key in ((preview_config.TIMELINE_NAME, 'timeline_exe'),) if not facts.get(key)]
     steps.append({'step': 'build', 'needed': bool(missing), 'folder': facts.get('server_dir'),
-                  'reason': ('missing ' + ', '.join(missing)) if missing else 'playback executables present'})
+                  'reason': ('missing ' + ', '.join(missing)) if missing else 'playback executable present'})
     has_instance = bool(facts.get('instance'))
     steps.append({'step': 'instance', 'needed': not has_instance, 'folder': None,
                   'reason': (INSTANCE_LABEL + ' present') if has_instance
@@ -320,7 +318,7 @@ def prepare_confirm_text(plan, game_dir, server_dir):
             lines.append(f'Upgrade the dinput8.dll proxy in {server_dir}' if upgrade else
                          f'Install the dinput8.dll proxy into {server_dir}')
         elif s['step'] == 'build':
-            lines.append(f'Build the playback server executables in {server_dir}')
+            lines.append(f'Build the playback server executable in {server_dir}')
         elif s['step'] == 'instance':
             lines.append('Create the local preview instance under runtime\\')
     if not lines:
@@ -373,14 +371,20 @@ NOTHING_STATES = ('rome', 'missing', 'no-folder')  # nothing of ours there
 
 
 def built_names():
-    return (preview_config.TIMELINE_NAME, preview_config.SERVER_NAME)
+    """What Prepare's build step writes into the server folder."""
+    return (preview_config.TIMELINE_NAME,)
+
+
+def cleanup_names():
+    """built_names() plus the intermediate trace exe older releases also wrote (deleted when present)."""
+    return built_names() + (preview_config.LEGACY_TRACE_NAME,)
 
 
 def cleanup_confirm_text(game_dir, server_dir):
-    names = ' and '.join(built_names())
     return (f"Clean up removes what Prepare created: the proxy in {game_dir} (Project Rome's dinput8.dll "
-            f'restored; administrator prompt), the proxy in {server_dir}, the built playback executables '
-            f'{names} in {server_dir}, and {INSTANCE_LABEL}. Your game, server files and recordings stay. '
+            f'restored; administrator prompt), the proxy in {server_dir}, the built playback executable '
+            f'{preview_config.TIMELINE_NAME} (and {preview_config.LEGACY_TRACE_NAME} from older versions) '
+            f'in {server_dir}, and {INSTANCE_LABEL}. Your game, server files and recordings stay. '
             'Close the game and the replay server first. Continue?')
 
 
@@ -404,7 +408,7 @@ def cleanup_plan(statuses, server_dir, app_root, game_dir=None, exists=None):
             actions.append({'action': 'skip', 'step': step, 'path': str(folder),
                             'text': _proxy_line(step, st.get('text') or state) + ' (not touched)'})
     if server_dir:
-        for name in built_names():
+        for name in cleanup_names():
             path = Path(server_dir) / name
             if exists(path):
                 actions.append({'action': 'delete_file', 'step': 'build', 'path': str(path),

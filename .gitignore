@@ -13,20 +13,12 @@ ProviderID.dat
 serverid.dat
 Win32Game.cfg
 
-# --- game scripts / instance data / rcon ---
-Scripts/
-Instance-bc2/
-Instance-viet/
-pb/
-tools/
-Gerenciar Server/
-backups/
+# --- build output ---
 dist/
 
 # --- recorded match data (large; share as a zip, not in the repo) ---
 demos/
 sessions/
-share_pt1/
 *.fbgd
 *.fbgk
 *.fbidd
@@ -39,17 +31,13 @@ share_pt1/
 # --- runtime / session logs ---
 *.log
 __pycache__/
-codex-session-*.md
 RuntimeLog_*.log
-
-summary_pt2.md
 
 # Private backend research artifacts: never publish captures, dumps or credentials
 *.dmp
 *.bin
+!builder_go/testdata/**
 *_capture/
-stub_capture/
-checkpoints/
 private-*/
 *.pcap
 *.pcapng
@@ -66,9 +54,6 @@ build/
 *.pyc
 *.json.tmp
 .venv/
-
-# Earlier research notes are not part of the runnable replay release
-/offline-replay/
 
 # Local edit backups (agents)
 *.bak_*

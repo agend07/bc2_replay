@@ -2,7 +2,7 @@
 import hashlib
 import struct
 from preview_config import (ORIGINAL_HASH, TRACE_HASH, TIMELINE_HASH,
-                            server_dir, trace_exe, timeline_exe)
+                            server_dir, timeline_exe)
 BASE = 0x400000
 CALLSITE = 0x647995
 CAVE = 0x165DB40
@@ -265,10 +265,13 @@ def make_timeline(source):
 
 def build():
     original = (server_dir() / 'Frost.Game.Main_Win32_Final.exe').read_bytes()
+    # The trace build is an intermediate image: kept in memory only, hash-checked, never written.
     trace = make_trace(original)
+    if hashlib.sha256(trace).hexdigest() != TRACE_HASH:
+        raise RuntimeError('Generated intermediate trace build hash differs; nothing written.')
     timeline, _ = make_timeline(trace)
-    outputs = ((trace_exe(), trace, TRACE_HASH), (timeline_exe(), timeline, TIMELINE_HASH))
-    # Validate all outputs before writing either file.
+    outputs = ((timeline_exe(), timeline, TIMELINE_HASH),)
+    # Validate the output before writing it.
     for path, data, expected in outputs:
         if hashlib.sha256(data).hexdigest() != expected:
             raise RuntimeError('Generated server hash differs: ' + path.name)

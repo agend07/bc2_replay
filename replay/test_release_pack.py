@@ -123,7 +123,7 @@ class HappyPath(Base):
         self.assertEqual([line.split('  ', 1)[1] for line in sums], rels, 'every file, sorted by path')
         for want in ('BC2LocalReplay.exe', '_internal/python314.dll', 'proxy/dinput8.dll', 'builder/builder.json',
                      'builder/builder.exe', 'datapack/mappack.json', 'datapack/gate_whitelist.json.zlib',
-                     'Redirect.ps1', 'USER_GUIDE.md'):
+                     'USER_GUIDE.md'):
             self.assertIn(want, rels)
         self.assertEqual([r for r in rels if r.startswith('builder')], ['builder/builder.exe', 'builder/builder.json'])
         with zipfile.ZipFile(self.zip) as z:
@@ -156,13 +156,27 @@ class HappyPath(Base):
             self.assertEqual(z.read(rp.release_name() + '/builder/builder.exe'), EXE_BYTES)
 
     def test_dirty_commit(self):
+        status = []
+
         def run(args, cwd, timeout):
             if args[:2] == ['git', 'status']:
-                return 0, ' M builder_go/x.go\n'
+                status.append(args)
+                return 0, ' M release_pack.py\n'
             return ok_run(args, cwd, timeout)
         self.assertEqual(self.pack(run=run), 0, self.text())
         with zipfile.ZipFile(self.zip) as z:
             self.assertTrue(json.loads(z.read(rp.release_name() + '/builder/builder.json'))['commit'].endswith('-dirty'))
+        self.assertEqual(status, [['git', 'status', '--porcelain', '--untracked-files=no']], 'whole repo, tracked only')
+
+    def test_git_commit(self):
+        head = 'c0ffee' * 6 + 'beef'
+
+        def run_status(rc, text):
+            return lambda args, cwd, timeout: (rc, text) if args[:2] == ['git', 'status'] else ok_run(args, cwd, timeout)
+        self.assertEqual(rp.git_commit(self.app, run_status(0, '')), head)
+        self.assertEqual(rp.git_commit(self.app, run_status(0, ' M docs/x.md\n')), head + '-dirty')
+        self.assertEqual(rp.git_commit(self.app, run_status(128, 'fatal')), head)
+        self.assertEqual(rp.git_commit(self.app, lambda a, c, t: (128, '')), 'unknown')
 
     def test_rerun_replaces_stage(self):
         self.assertEqual(self.pack(), 0)

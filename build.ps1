@@ -1,6 +1,8 @@
 # Windows, Python 3.13 and requirements-build.txt. No game files required.
 # -BuilderExe: a builder.exe (builder_go/build.ps1 output, e.g. the CI artifact) placed into the package as
 # builder/builder.exe; without it the package has no builder (release_pack.py assembles the full release zip).
+# --exclude-module _hashlib: the panel only uses hashlib.sha256 (builtin _sha2 fallback) and no ssl, so OpenSSL's
+# libcrypto-3.dll (5 MB) is not shipped.
 param([ValidateSet('onedir','onefile')][string]$BundleMode = 'onedir', [string]$BuilderExe = '')
 $ErrorActionPreference = 'Stop'
 Push-Location $PSScriptRoot
@@ -9,6 +11,7 @@ try {
     $work = Join-Path $PSScriptRoot "build/$BundleMode"
     python -m PyInstaller --noconfirm --clean "--$BundleMode" --noupx --console `
         --name BC2LocalReplay --paths "$PSScriptRoot" `
+        --exclude-module _hashlib `
         --add-data "$PSScriptRoot/backend/protocol_fixtures.json;backend" `
         --distpath "$output" --workpath "$work" --specpath "$work" preview.py
     if ($LASTEXITCODE -ne 0) { throw 'PyInstaller build failed' }
@@ -22,7 +25,7 @@ try {
     $stage = Join-Path $PSScriptRoot "build/package-$BundleMode"
     if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
     New-Item $stage -ItemType Directory | Out-Null
-    Copy-Item "$app/BC2LocalReplay.exe", Redirect.ps1, USER_GUIDE.md $stage
+    Copy-Item "$app/BC2LocalReplay.exe", USER_GUIDE.md $stage
     if ($BuilderExe) {
         New-Item (Join-Path $stage 'builder') -ItemType Directory | Out-Null
         Copy-Item $BuilderExe (Join-Path $stage 'builder/builder.exe')

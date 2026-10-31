@@ -52,7 +52,7 @@ game's process id. The same `<pid>` links the three logs of one game session.
 
 4. **Prepare (one UAC prompt).** Close the game and any dedicated server, then click **Prepare**.
    - Expected: a confirmation listing `Install the dinput8.dll proxy into` (game folder) with `(Windows will ask for administrator permission)`.
-   - Expected: it also lists `Build the playback server executables in` and `Create the local preview instance under`, and ends with `Nothing else is changed. Continue?`
+   - Expected: it also lists `Build the playback server executable in` and `Create the local preview instance under`, and ends with `Nothing else is changed. Continue?`
    - Click **Yes**, then answer the Windows UAC prompt once.
    - Expected: the status line runs through `Prepare: installing client proxy… (answer the Windows permission prompt)` … `Prepare: checking setup…`
    - If you see `Prepare stopped:` or `Prepare failed at`, write down the whole line. A `msimg32.dll present: remove it first.` stop means `msimg32.dll` (the standalone chat/smoke filter from github.com/agend07/bc2-chat-smoke, or the older bc2_mute) is in the game folder; remove it first (both swap the same vtables).

@@ -213,7 +213,7 @@ class VersionCheckTests(Base):
     def test_prepare_skips_installed_mismatch(self):
         st = {'state': 'installed', 'text': self.TEXT, 'version': '0.0.9'}
         plan = fr.prepare_plan({'game_dir': 'G', 'server_dir': 'S', 'client_proxy': st, 'server_proxy': st,
-                                'timeline_exe': True, 'server_exe': True, 'instance': True})
+                                'timeline_exe': True, 'instance': True})
         self.assertIsNone(plan['stop'])
         self.assertEqual(fr.needed_steps(plan), [])
 
@@ -261,11 +261,11 @@ class ServerProxyCheckTests(Base):
         m.assert_called_once_with(self.exe.parent, self.root)
 
 
-def facts(client='rome', server='rome', timeline=False, trace=False, instance=False, game='G', srv='S', **extra):
+def facts(client='rome', server='rome', timeline=False, instance=False, game='G', srv='S', **extra):
     f = {'game_dir': game, 'server_dir': srv,
          'client_proxy': None if client is None else {'state': client, 'text': 'client ' + str(client)},
          'server_proxy': None if server is None else {'state': server, 'text': 'server ' + str(server)},
-         'timeline_exe': timeline, 'server_exe': trace, 'instance': instance}
+         'timeline_exe': timeline, 'instance': instance}
     f.update(extra)
     return f
 
@@ -275,35 +275,43 @@ class PreparePlanTests(unittest.TestCase):
         for cs in STATES:
             for ss in STATES:
                 for timeline in (False, True):
-                    for trace in (False, True):
-                        for instance in (False, True):
-                            plan = fr.prepare_plan(facts(cs, ss, timeline, trace, instance))
-                            key = (cs, ss, timeline, trace, instance)
-                            steps = plan['steps']
-                            self.assertEqual([s['step'] for s in steps], list(fr.PREPARE_STEPS), key)
-                            self.assertEqual(steps[0]['needed'], cs in ('rome', 'upgrade'), key)
-                            self.assertEqual(steps[1]['needed'], ss in ('rome', 'upgrade'), key)
-                            self.assertEqual(steps[2]['needed'], not (timeline and trace), key)
-                            self.assertEqual(steps[3]['needed'], not instance, key)
-                            bad_c = cs not in ('rome', 'upgrade', 'installed')
-                            bad_s = ss not in ('rome', 'upgrade', 'installed')
-                            if bad_c:
-                                self.assertEqual(plan['stop'], 'Client proxy: client ' + cs, key)
-                            elif bad_s:
-                                self.assertEqual(plan['stop'], 'Server folder proxy: server ' + ss, key)
-                            else:
-                                self.assertIsNone(plan['stop'], key)
+                    for instance in (False, True):
+                        plan = fr.prepare_plan(facts(cs, ss, timeline, instance))
+                        key = (cs, ss, timeline, instance)
+                        steps = plan['steps']
+                        self.assertEqual([s['step'] for s in steps], list(fr.PREPARE_STEPS), key)
+                        self.assertEqual(steps[0]['needed'], cs in ('rome', 'upgrade'), key)
+                        self.assertEqual(steps[1]['needed'], ss in ('rome', 'upgrade'), key)
+                        self.assertEqual(steps[2]['needed'], not timeline, key)
+                        self.assertEqual(steps[3]['needed'], not instance, key)
+                        bad_c = cs not in ('rome', 'upgrade', 'installed')
+                        bad_s = ss not in ('rome', 'upgrade', 'installed')
+                        if bad_c:
+                            self.assertEqual(plan['stop'], 'Client proxy: client ' + cs, key)
+                        elif bad_s:
+                            self.assertEqual(plan['stop'], 'Server folder proxy: server ' + ss, key)
+                        else:
+                            self.assertIsNone(plan['stop'], key)
 
     def test_reasons_and_folders(self):
-        plan = fr.prepare_plan(facts('upgrade', 'installed', timeline=True))
+        plan = fr.prepare_plan(facts('upgrade', 'installed', timeline=False))
         c, s, b, i = plan['steps']
         self.assertEqual((c['folder'], c['state'], c['reason']), ('G', 'upgrade', 'Client proxy: client upgrade'))
         self.assertEqual((s['folder'], s['needed'], s['reason']), ('S', False, 'Server folder proxy: server installed'))
-        self.assertEqual(b['reason'], 'missing ' + preview_config.SERVER_NAME)
+        self.assertEqual(b['reason'], 'missing ' + preview_config.TIMELINE_NAME)
         self.assertEqual(i['reason'], 'runtime\\Instance-local-preview\\ServerOptions.ini missing')
-        done = fr.prepare_plan(facts('installed', 'installed', True, True, True))
+        done = fr.prepare_plan(facts('installed', 'installed', True, True))
         self.assertEqual(fr.needed_steps(done), [])
-        self.assertEqual(done['steps'][2]['reason'], 'playback executables present')
+        self.assertEqual(done['steps'][2]['reason'], 'playback executable present')
+
+    def test_legacy_trace_exe_not_required(self):
+        """The intermediate trace exe is no longer written; only the timeline exe satisfies build."""
+        self.assertNotIn(preview_config.LEGACY_TRACE_NAME, fr.built_names())
+        self.assertNotIn('server_exe', fr.prepare_facts({'server_dir': 'SRV'}, Path('APP'),
+                                                         status=lambda f, r: {'state': 'rome', 'text': 't'},
+                                                         is_file=lambda p: True))
+        plan = fr.prepare_plan(facts('installed', 'installed', timeline=True, instance=True))
+        self.assertFalse(plan['steps'][2]['needed'])
 
     def test_unset_paths_stop(self):
         plan = fr.prepare_plan(facts(None, 'rome', game=None))
@@ -321,7 +329,7 @@ class PreparePlanTests(unittest.TestCase):
         self.assertIsNone(fr.prepare_plan(f)['stop'])
 
     def test_format_plan(self):
-        lines = fr.format_plan(fr.prepare_plan(facts('installed', 'rome', True, True, True))).splitlines()
+        lines = fr.format_plan(fr.prepare_plan(facts('installed', 'rome', True, True))).splitlines()
         self.assertEqual(lines[0], 'skip  client_proxy: Client proxy: client installed')
         self.assertEqual(lines[1], 'RUN   server_proxy: Server folder proxy: server rome')
 
@@ -341,7 +349,8 @@ class PreparePlanTests(unittest.TestCase):
         f = fr.prepare_facts(cfg, root, status=status, is_file=is_file)
         self.assertEqual(seen, [(str(Path('GAME')), root), ('SRV', root)])
         self.assertEqual((f['game_dir'], f['server_dir']), (str(Path('GAME')), 'SRV'))
-        self.assertEqual((f['timeline_exe'], f['server_exe'], f['instance']), (True, False, False))
+        self.assertEqual((f['timeline_exe'], f['instance']), (True, False))
+        self.assertNotIn(Path('SRV') / preview_config.LEGACY_TRACE_NAME, probed)
         self.assertIn(root / 'runtime' / 'Instance-local-preview' / 'ServerOptions.ini', probed)
         f = fr.prepare_facts({}, root, status=status, is_file=is_file)
         self.assertEqual((f['game_dir'], f['client_proxy'], f['server_proxy'], f['timeline_exe']),
@@ -388,13 +397,13 @@ class RunPrepareTests(unittest.TestCase):
         self.assertEqual(self.lines[0], 'Prepare: installing client proxy… (answer the Windows permission prompt)')
 
     def test_skip_when_not_needed(self):
-        self.go(fr.prepare_plan(facts('installed', 'rome', True, True, True)))
+        self.go(fr.prepare_plan(facts('installed', 'rome', True, True)))
         self.assertEqual(self.calls, [('install', 'S', 'SRC', ('check_processes', 'runtime_dir')), ('check',)])
         self.calls.clear()
-        self.go(fr.prepare_plan(facts('installed', 'installed', False, True, True)))
+        self.go(fr.prepare_plan(facts('installed', 'installed', False, True)))
         self.assertEqual(self.calls, [('run', 'build'), ('check',)])
         self.calls.clear()
-        self.go(fr.prepare_plan(facts('installed', 'installed', True, True, True)))
+        self.go(fr.prepare_plan(facts('installed', 'installed', True, True)))
         self.assertEqual(self.calls, [('check',)])
         self.assertEqual(self.lines[-1], 'Prepare: checking setup…')
 
@@ -433,12 +442,12 @@ class RunPrepareTests(unittest.TestCase):
         def bad_check(cfg, app_root):
             raise ValueError('x')
         with self.assertRaises(fr.PrepareFailed) as ctx:
-            fr.run_prepare({}, 'R', self.run_command, self.install, plan=fr.prepare_plan(facts('installed', 'installed', True, True, True)),
+            fr.run_prepare({}, 'R', self.run_command, self.install, plan=fr.prepare_plan(facts('installed', 'installed', True, True)),
                            check=bad_check)
         self.assertEqual(str(ctx.exception), 'Prepare failed at check: x')
 
     def test_plan_computed_when_not_given(self):
-        with mock.patch.object(fr, 'prepare_facts', return_value=facts('installed', 'installed', True, True, True)) as m:
+        with mock.patch.object(fr, 'prepare_facts', return_value=facts('installed', 'installed', True, True)) as m:
             fr.run_prepare({'k': 1}, 'R', self.run_command, self.install, check=self.check)
         m.assert_called_once_with({'k': 1}, 'R')
         self.assertEqual(self.calls, [('check',)])
@@ -466,15 +475,20 @@ class CleanupTests(unittest.TestCase):
                 'server_proxy': server and {'state': server, 'text': 's ' + server}}
 
     def test_plan_order_and_states(self):
-        for name in fr.built_names():
-            (self.server / name).write_bytes(b'MZ')
+        (self.server / preview_config.TIMELINE_NAME).write_bytes(b'MZ')
         (self.instance / 'AdminScripts').mkdir(parents=True)
+        actions = fr.cleanup_plan(self.statuses(), str(self.server), self.root, game_dir='G')
+        self.assertEqual([(a['action'], a['step']) for a in actions],
+                         [('uninstall', 'client_proxy'), ('uninstall', 'server_proxy'), ('delete_file', 'build'),
+                          ('delete_tree', 'instance')])
+        # An old release's leftover intermediate trace exe is deleted too (never required, never built now).
+        (self.server / preview_config.LEGACY_TRACE_NAME).write_bytes(b'MZ')
         actions = fr.cleanup_plan(self.statuses(), str(self.server), self.root, game_dir='G')
         self.assertEqual([(a['action'], a['step']) for a in actions],
                          [('uninstall', 'client_proxy'), ('uninstall', 'server_proxy'), ('delete_file', 'build'),
                           ('delete_file', 'build'), ('delete_tree', 'instance')])
         self.assertEqual(actions[2]['path'], str(self.server / preview_config.TIMELINE_NAME))
-        self.assertEqual(actions[3]['path'], str(self.server / preview_config.SERVER_NAME))
+        self.assertEqual(actions[3]['path'], str(self.server / preview_config.LEGACY_TRACE_NAME))
         self.assertEqual(actions[4]['text'], 'runtime\\Instance-local-preview deleted')
         for state in ('rome', 'missing', 'no-folder'):
             self.assertEqual(fr.cleanup_plan(self.statuses(state, state), str(self.root / 'empty'),
@@ -502,10 +516,11 @@ class CleanupTests(unittest.TestCase):
                               runtime_dir='RT', progress=lines.append)
         self.assertEqual(self.calls, [('uninstall', 'G', ('runtime_dir',)),
                                       ('uninstall', 'S', ('check_processes', 'runtime_dir')),
-                                      ('file', preview_config.TIMELINE_NAME), ('file', preview_config.SERVER_NAME),
+                                      ('file', preview_config.TIMELINE_NAME),
+                                      ('file', preview_config.LEGACY_TRACE_NAME),
                                       ('tree', 'Instance-local-preview')])
         self.assertEqual(line, 'Clean up finished: client proxy removed, server folder proxy removed, '
-                               f'{preview_config.TIMELINE_NAME} deleted, {preview_config.SERVER_NAME} deleted, '
+                               f'{preview_config.TIMELINE_NAME} deleted, {preview_config.LEGACY_TRACE_NAME} deleted, '
                                'runtime\\Instance-local-preview deleted.')
         self.assertEqual(lines[0], 'Clean up: removing client proxy… (answer the Windows permission prompt)')
         self.assertEqual(lines[1], 'Clean up: removing server folder proxy…')
@@ -540,7 +555,7 @@ class CleanupTests(unittest.TestCase):
                                              '(already removed: client proxy removed)')
 
     def test_real_deletes_only_planned_paths(self):
-        for name in fr.built_names():
+        for name in fr.cleanup_names():  # timeline exe + an old release's leftover trace exe
             (self.server / name).write_bytes(b'MZ')
         keep = self.server / preview_config.ORIGINAL_NAME
         keep.write_bytes(b'MZ keep')

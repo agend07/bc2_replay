@@ -18,7 +18,8 @@ straight into the map on the local replay server, with no menu clicks and no `ho
    client (`preview.py client`) and for the replay server (`replay/timeline.py`, `preview.py server`).
 
 Both target the retail client `BFBC2Game.exe` (SHA-256 `3911fcc8…3d54258`) with
-Project Rome's `dinput8.dll`. The addresses below refer to that exe.
+Project Rome's `dinput8.dll`. The addresses below refer to that exe. The proxy also carries Steam
+`BFBC2Game.exe` profiles (SHA-256 `22e96001…`) for the chat commands and the recorder (see section 5).
 
 ## 1. Auto-login and auto-join (web-launch path)
 
@@ -64,9 +65,9 @@ ignored by the retail client.
 ## 2. No hosts entry (dinput8.dll proxy)
 
 Project Rome's `dinput8.dll` hooks `gethostbyname` and sends EA hostnames to
-`bfbc2.emulatornexus.com`. That name is hard-coded and has no config option. The
-`hosts` entry `127.0.0.1 bfbc2.emulatornexus.com` only exists to point it at the
-local backend.
+`bfbc2.emulatornexus.com`. That name is hard-coded and has no config option. Pointing
+it at the local backend used to need a `hosts` entry `127.0.0.1 bfbc2.emulatornexus.com`;
+the proxy's `BC2_ROME_HOST` redirect below replaces any such entry, and no `hosts` edit is used.
 
 The proxy (`dinput8_proxy.c`) sits in front of Rome:
 

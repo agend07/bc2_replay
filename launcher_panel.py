@@ -357,11 +357,11 @@ def add_launcher(window, on_paths_changed=None, on_status=None):
     b.pack(side='left', padx=3, pady=4)
     buttons['prepare'] = b
     tip(b, 'One-time setup: installs the proxy in the game and server folders and builds the replay server '
-           'executables. Close the game and the server first.')
+           'executable. Close the game and the server first.')
     b = ttk.Button(row, text='Clean up…', command=cleanup)
     b.pack(side='right', padx=3, pady=4)
     buttons['cleanup'] = b
-    tip(b, 'Undo Prepare: removes the proxies (restores the Rome dinput8.dll), the built replay executables and the '
+    tip(b, 'Undo Prepare: removes the proxies (restores the Rome dinput8.dll), the built replay executable and the '
            'local instance. Your game, server files and recordings stay. Asks first.')
     wrap_to_width(ttk.Label(frame, textvariable=proxy_text, wraplength=440)).grid(
         row=5, column=0, columnspan=3, sticky='ew', padx=5, pady=(0, 4))
